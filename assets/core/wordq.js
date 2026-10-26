@@ -228,7 +228,7 @@
       var ROLES = ['cond', 'res1', 'res2'], FIXED = ['在', '從', '一', '好像為', '的', '變得有', '不', '就不', '把'], n = 0;
       var labels = c.labels;
       c = { id: c.id, img: c.img, full: c.parts.join(''), segs: c.parts.map(function (t, i) {
-        return FIXED.indexOf(t) >= 0 || (labels && !labels[i] && t.length <= 2) ? { text: t, kind: 'conj' }
+        return FIXED.indexOf(t) >= 0 || (labels && !labels[i] && t.length <= 3) ? { text: t, kind: 'conj' }
           : { text: t, kind: 'blank', role: ROLES[Math.min(n++, 2)], label: labels ? labels[i] : '' };
       }) };
     }
@@ -287,7 +287,7 @@
     return { id: x.id, prompt: '「' + x.sentence + '」\n用了什麼修辭？', say: say, autoSay: say,
       options: order.map(function (n) { return { text: n }; }), answer: order.indexOf(x.answer),
       reveal: { target: 'prompt', text: x.sentence, marks: rhetoricMarks((cards.filter(function (c) { return c.name === x.answer; })[0] || {}).key, x.sentence, x.mark) },
-      hints: { h1: { text: '想一想：這句話是把東西寫得像人、把東西比成別的東西、有重複的字，還是用問句？' }, h2: { text: x.clue }, teach: { text: x.explain } } };
+      hints: { h1: { text: '想一想：先把句子念一遍，找找看它特別的地方在哪裡，再想想是哪一種修辭。' }, h2: { text: x.clue }, teach: { text: x.explain } } };
   }
   /* 本身就是名詞的疊字（星星、媽媽），不算修辭的疊字 */
   var NOUN_AA = ['星星', '猩猩', '媽媽', '爸爸', '哥哥', '姊姊', '姐姐', '弟弟', '妹妹', '爺爺', '奶奶', '公公', '婆婆',
@@ -305,6 +305,10 @@
       if (m) { out.push(m[1]); if (m[2]) out.push({ text: m[2], kind: 'line' }); }
     } else if (key === 'question') {
       var q = text.indexOf('？'); if (q > 0) out.push(text.slice(0, q + 1));
+    } else if (key === 'exclaim') {
+      /* 感嘆：圈出嘆詞或驚嘆句 */
+      m = /^(唉|啊|哇|哎呀|哇塞|天哪|唉呀)/.exec(text);
+      if (m) out.push(m[1]); else { var e = text.indexOf('！'); if (e > 0) out.push(text.slice(0, e + 1)); }
     }
     return out;
   }

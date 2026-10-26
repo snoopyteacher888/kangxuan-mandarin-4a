@@ -10,7 +10,7 @@
   function go(ctx, key) { ctx.go('#/' + ctx.lessonId + '/rhetoric' + (key ? '?p=' + key : '')); }
 
   /* 關卡地圖：每一關一顆彩色圓章（圖案＋大數字），下面三顆星；下一關會跳動，綜合挑戰是金色獎盃 */
-  var LOOK = { personify: ['🧸', 'c-pink'], simile: ['🌙', 'c-sky'], redup: ['✨', 'c-green'], question: ['❓', 'c-purple'], repeat: ['🎵', 'c-orange'], sound: ['🔔', 'c-sky'] };
+  var LOOK = { personify: ['🧸', 'c-pink'], simile: ['🌙', 'c-sky'], redup: ['✨', 'c-green'], question: ['❓', 'c-purple'], repeat: ['🎵', 'c-orange'], sound: ['🔔', 'c-sky'], exclaim: ['❗', 'c-pink'], parallel: ['📚', 'c-green'], sense: ['👀', 'c-sky'] };
   function starRow(n) {
     return h('span', { class: 'lv-stars', 'aria-label': n + ' 顆星' }, [0, 1, 2].map(function (k) { return h('span', { class: 'lv-star' + (k < n ? ' on' : '') }, '★'); }));
   }
