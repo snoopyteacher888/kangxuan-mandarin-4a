@@ -1,0 +1,220 @@
+{
+ "id": "L06",
+ "title": "小水杯大學問（測試用）",
+ "author": "測試",
+ "paragraphs": [
+  {
+   "sentences": [
+    {
+     "id": "p1s1",
+     "text": "小水杯是用玻璃做的。"
+    },
+    {
+     "id": "p1s2",
+     "text": "水杯可以裝水。"
+    }
+   ]
+  },
+  {
+   "heading": "水杯的製作",
+   "sentences": [
+    {
+     "id": "p2s1",
+     "text": "先把沙子燒熱，再吹成杯子。"
+    }
+   ]
+  }
+ ],
+ "vocab": [
+  {
+   "word": "玻璃",
+   "meaning": "透明、容易破的材料。",
+   "img": "glass.png"
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "prompt": "小水杯是用什麼做的？",
+   "answer": 0,
+   "evidence": "小水杯是用玻璃做的。",
+   "options": [
+    {
+     "text": "玻璃",
+     "img": "glass.png"
+    },
+    {
+     "text": "木頭",
+     "img": "wood.png"
+    },
+    {
+     "text": "紙",
+     "img": "paper.png"
+    },
+    {
+     "text": "布",
+     "img": "cloth.png"
+    }
+   ]
+  },
+  {
+   "id": "q2",
+   "prompt": "水杯可以做什麼？",
+   "answer": 1,
+   "evidence": "水杯可以裝水。",
+   "options": [
+    {
+     "text": "寫字",
+     "img": "pencil.png"
+    },
+    {
+     "text": "裝水",
+     "img": "water.png"
+    },
+    {
+     "text": "唱歌",
+     "img": "sing.png"
+    },
+    {
+     "text": "跑步",
+     "img": "run.png"
+    }
+   ]
+  },
+  {
+   "id": "q3",
+   "prompt": "做杯子要先做什麼？",
+   "answer": 2,
+   "evidence": "先把沙子燒熱，再吹成杯子。",
+   "options": [
+    {
+     "text": "畫圖",
+     "img": "draw.png"
+    },
+    {
+     "text": "洗手",
+     "img": "wash.png"
+    },
+    {
+     "text": "把沙子燒熱",
+     "img": "fire.png"
+    },
+    {
+     "text": "睡覺",
+     "img": "sleep.png"
+    }
+   ]
+  }
+ ],
+ "testExtra": [
+  {
+   "id": "t1",
+   "prompt": "吹成杯子之前要做什麼？",
+   "answer": 3,
+   "evidence": "先把沙子燒熱，再吹成杯子。",
+   "options": [
+    {
+     "text": "唱歌",
+     "img": "sing.png"
+    },
+    {
+     "text": "跑步",
+     "img": "run.png"
+    },
+    {
+     "text": "睡覺",
+     "img": "sleep.png"
+    },
+    {
+     "text": "把沙子燒熱",
+     "img": "fire.png"
+    }
+   ]
+  }
+ ],
+ "storyMap": {
+  "type": "fishbone",
+  "prompt": "用魚骨圖整理課文重點",
+  "head": {
+   "text": "小水杯大學問",
+   "img": "cup.png"
+  },
+  "bones": [
+   {
+    "id": "b1",
+    "title": "水杯的材料",
+    "prompt": "哪些是「水杯的材料」？",
+    "evidence": "先把沙子燒熱，再吹成杯子。",
+    "cards": [
+     {
+      "id": "c-sand",
+      "text": "沙子",
+      "img": "sand.png"
+     },
+     {
+      "id": "c-fire",
+      "text": "火",
+      "img": "fire.png"
+     }
+    ]
+   },
+   {
+    "id": "b2",
+    "title": "水杯的做法",
+    "prompt": "哪些是「水杯的做法」？",
+    "evidence": "先把沙子燒熱，再吹成杯子。",
+    "cards": [
+     {
+      "id": "c-blow",
+      "text": "吹成杯子",
+      "img": "cup.png"
+     }
+    ]
+   },
+   {
+    "id": "b3",
+    "title": "水杯的用途",
+    "prompt": "哪些是「水杯的用途」？",
+    "evidence": "水杯可以裝水。",
+    "cards": [
+     {
+      "id": "c-water",
+      "text": "裝水",
+      "img": "water.png"
+     }
+    ]
+   }
+  ],
+  "decoys": [
+   {
+    "id": "c-lead",
+    "text": "鉛",
+    "img": "lead.png"
+   }
+  ],
+  "tail": {
+   "id": "tail",
+   "prompt": "這篇課文最後告訴我們什麼？",
+   "answer": 0,
+   "evidence": "水杯可以裝水。",
+   "options": [
+    {
+     "text": "水杯可以裝水",
+     "img": "water.png"
+    },
+    {
+     "text": "水杯是鐵做的",
+     "img": "wood.png"
+    },
+    {
+     "text": "要買很多杯子",
+     "img": "cup.png"
+    },
+    {
+     "text": "不要喝水",
+     "img": "no.png"
+    }
+   ]
+  }
+ }
+}
