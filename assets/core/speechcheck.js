@@ -6,7 +6,7 @@
 })(this, function () {
   var PATTERNS = { zhiyao: ['只要', '就'], ruguo: ['如果', '不但', '還'], yinwei: ['因為', '只能'], jingran: ['竟然'], cai: ['才'], yibian: ['一邊', '一邊'], xianzai: ['先', '再'], chule: ['除了', '還'], youren: ['有人', '有人'], caineng: ['才能'], meixiangdao: ['沒想到'], jiu: ['就'], yihuier: ['一會兒', '一會兒'], weile: ['為了'], erqie: ['而且'], rang: ['讓'], yinsuo: ['因為', '所以'], dang: ['當'], keshi: ['可是'], buzhi: ['不只', '還'],
     /* 四上的句型 */
-    youshi: ['有時', '有時', '有時'], buguan: ['不管', '都'], bulun: ['不論', '總'], dangjiu: ['當', '就'], budanhai: ['不但', '還'], chulehai: ['除了', '還'], ye: ['也'], ruguo1: ['如果'], shiyeshi: ['是', '也是'], shihaishi: ['是', '還是'], wulun: ['無論', '始終'], meijing: ['沒想到', '竟然'], jiaru: ['假如'], budangeng: ['不但', '更'], suoyi: ['所以'], ruguojiu: ['如果', '就'], yimian: ['以免'], youyu: ['由於', '因此'], suiran: ['雖然', '卻'], bushi: ['不是', '就是'], yuqi: ['與其', '不如'] };
+    youshi: ['有時', '有時', '有時'], yibian2: ['一邊', '一邊'], buguan: ['不管', '都'], bulun: ['不論', '總'], dangjiu: ['當', '就'], budanhai: ['不但', '還'], chulehai: ['除了', '還'], ye: ['也'], ruguo1: ['如果'], shiyeshi: ['是', '也是'], shihaishi: ['是', '還是'], wulun: ['無論', '始終'], meijing: ['沒想到', '竟然'], jiaru: ['假如'], budangeng: ['不但', '更'], suoyi: ['所以'], ruguojiu: ['如果', '就'], yimian: ['以免'], youyu: ['由於', '因此'], suiran: ['雖然', '卻'], bushi: ['不是', '就是'], yuqi: ['與其', '不如'] };
   var MIN_PART = 2;
 
   function normalize(s) {
