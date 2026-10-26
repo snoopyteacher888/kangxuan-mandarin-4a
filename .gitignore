@@ -1,5 +1,5 @@
 *.plain.json
-node_modules/
+node_modules
 .DS_Store
 .superpowers/
 !tests/fixtures/*.plain.json
