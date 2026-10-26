@@ -60,8 +60,8 @@ test('第 2 課課文原稿（有的話）格式正確、依據句找得到', { 
     ...l.vocab.map(v => v.img), ...l.quiz.concat(l.testExtra).flatMap(q => q.options.map(o => o.img))];
   for (const f of imgs.filter(Boolean)) assert.ok(imgOk(f), f);
 });
-test('第 2 課句型：有時、一邊、不管，例句和拖拉句子都用到關聯詞', () => {
-  assert.deepEqual(W.pattern.map(pt => pt.key), ['youshi', 'yibian2', 'buguan']);
+test('第 2 課句型：有時、一邊、不管、不論，例句和拖拉句子都用到關聯詞', () => {
+  assert.deepEqual(W.pattern.map(pt => pt.key), ['youshi', 'yibian2', 'buguan', 'bulun']);
   const S = require('../../assets/core/speechcheck.js');
   for (const pt of W.pattern) for (const t of pt.examples.concat(pt.conj.map(c => c.full))) assert.equal(S.check({ kind: 'pattern', key: pt.key }, t).status, 'pending', t);
   for (const pt of W.pattern) for (const c of pt.conj) assert.equal(c.sentence.split('＿').join('').length + S.PATTERNS[pt.key].join('').length, c.full.length, c.id);
