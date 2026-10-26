@@ -23,14 +23,16 @@ test('empty evidence rejected', () => {
 test('missing paragraphs rejected', () => {
   const l = fixture(); delete l.paragraphs; assert.ok(validateLesson(l).length > 0);
 });
-test('real lesson06 is valid (if present)', { skip: !fs.existsSync(path.join(__dirname, '../../content/lesson06.plain.json')) }, () => {
-  const l = JSON.parse(fs.readFileSync(path.join(__dirname, '../../content/lesson06.plain.json'), 'utf8'));
-  assert.deepEqual(validateLesson(l), []);
-  assert.equal(l.quiz.length, 14); assert.equal(l.storyMap.bones.length, 3); assert.equal(l.testExtra.length, 7);
-  assert.equal(l.talk.length, 2);
-  /* 沒有自己寫提示的題目，依據句一定要找得到課文句子（提示才會亮起來） */
-  const { locate } = require('../../assets/core/locate.js');
-  l.quiz.concat(l.testExtra).filter(q => !q.hints).forEach(q => assert.ok(locate(l, q.evidence).sentIds.length, q.id + ' 的依據句找不到'));
+/* 本機有課文明文時（不進版控），每課都要通過檢查 */
+const contentDir = path.join(__dirname, '../../content');
+(fs.existsSync(contentDir) ? fs.readdirSync(contentDir) : []).filter(f => /^lesson\d\d\.plain\.json$/.test(f)).forEach(f => {
+  test('real ' + f + ' is valid', () => {
+    const l = JSON.parse(fs.readFileSync(path.join(contentDir, f), 'utf8'));
+    assert.deepEqual(validateLesson(l), []);
+    /* 沒有自己寫提示的題目，依據句一定要找得到課文句子（提示才會亮起來） */
+    const { locate } = require('../../assets/core/locate.js');
+    l.quiz.concat(l.testExtra || []).filter(q => !q.hints).forEach(q => assert.ok(locate(l, q.evidence).sentIds.length, f + ' ' + q.id + ' 的依據句找不到'));
+  });
 });
 
 test('fishbone bone needs cards', () => {
