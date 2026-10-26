@@ -1,2 +1,2 @@
-/* 四年級的後台（Google 試算表 + Apps Script）還沒部署：部署好以後把網址貼在這裡 */
-window.H3A_CONFIG = { backendUrl: '' };
+/* 四年級的後台（自己的 Google 試算表 + Apps Script，不和三年級共用） */
+window.H3A_CONFIG = { backendUrl: 'https://script.google.com/macros/s/AKfycbx0JSKN0xzIrAXF9BuM9L4Rm3oU1nY-D9cT7IpbYpoeHBHqJ3ta6UWaPjjn6yWYq7z6/exec' };

@@ -199,15 +199,17 @@
     return q;
   }
   /* 句型的關聯詞，畫面上標橘色 */
-  var CONJ_WORDS = ['只要', '就', '如果', '不但', '還', '因為', '所以', '只能', '竟然', '才', '一邊', '先', '再', '除了', '有人', '才能', '沒想到', '一會兒', '為了', '而且', '讓', '當', '可是', '不只'];
-  function matchQuestion(m, r) {
+  var CONJ_WORDS = ['只要', '就', '如果', '不但', '還', '因為', '所以', '只能', '竟然', '才', '一邊', '先', '再', '除了', '有人', '才能', '沒想到', '一會兒', '為了', '而且', '讓', '當', '可是', '不只',
+    '有時', '不管', '不論', '無論', '始終', '假如', '以免', '由於', '因此', '雖然', '不是', '就是', '與其', '不如', '還是', '也是'];
+  function matchQuestion(m, r, key) {
     var q = first(m, m.front + '……', null, r);
     q.say = m.front;
     if (m.img) q.img = m.img;
     q.hints = { h1: { text: '想一想，做了前面的事以後，會有什麼結果？' }, h2: { text: m.clue }, teach: { text: m.explain } };
     q.list = true;
     q.promptClass = 'pt-cond'; q.optionsClass = 'pt-res';
-    q.hl = CONJ_WORDS;
+    /* 這個句型的單字關聯詞（都、總、也、卻、更）只在自己的句型裡標出來 */
+    q.hl = CONJ_WORDS.concat(key && speechcheck.PATTERNS[key] || []);
     return q;
   }
   function conjQuestion(c, r) {
@@ -326,7 +328,8 @@
     q.hints = { h1: { text: '想一想：' + card.name + '是' + card.meaning }, h2: { text: p.clue }, teach: { text: p.explain } };
     return q;
   }
-  var PATTERN_WORDS = { zhiyao: '「只要」和「就」', ruguo: '「如果」、「不但」、「還」', yinwei: '「因為」和「只能」', jingran: '「竟然」', cai: '「才」', yibian: '兩次「一邊」', xianzai: '「先」和「再」', chule: '「除了」和「還」', youren: '兩次「有人」', caineng: '「才能」', meixiangdao: '「沒想到」', jiu: '「就」', yihuier: '兩次「一會兒」', weile: '「為了」', erqie: '「而且」', rang: '「讓」', yinsuo: '「因為」和「所以」', dang: '「當」', keshi: '「可是」', buzhi: '「不只」和「還」' };
+  var PATTERN_WORDS = { zhiyao: '「只要」和「就」', ruguo: '「如果」、「不但」、「還」', yinwei: '「因為」和「只能」', jingran: '「竟然」', cai: '「才」', yibian: '兩次「一邊」', xianzai: '「先」和「再」', chule: '「除了」和「還」', youren: '兩次「有人」', caineng: '「才能」', meixiangdao: '「沒想到」', jiu: '「就」', yihuier: '兩次「一會兒」', weile: '「為了」', erqie: '「而且」', rang: '「讓」', yinsuo: '「因為」和「所以」', dang: '「當」', keshi: '「可是」', buzhi: '「不只」和「還」',
+    youshi: '三次「有時」', buguan: '「不管」和「都」', bulun: '「不論」和「總」', dangjiu: '「當」和「就」', budanhai: '「不但」和「還」', chulehai: '「除了」和「還」', ye: '「也」', ruguo1: '「如果」', shiyeshi: '「是」和「也是」', shihaishi: '「是」和「還是」', wulun: '「無論」和「始終」', meijing: '「沒想到」和「竟然」', jiaru: '「假如」', budangeng: '「不但」和「更」', suoyi: '「所以」', ruguojiu: '「如果」和「就」', yimian: '「以免」', youyu: '「由於」和「因此」', suiran: '「雖然」和「卻」', bushi: '「不是」和「就是」', yuqi: '「與其」和「不如」' };
   function speakMethod(rule) {
     if (rule.kind === 'phrase') return '先說它是什麼樣子，再說「的」，最後說它是什麼。';
     if (rule.kind === 'word') return '記得句子裡要說到「' + rule.word + '」，而且要說完整的一句話喔。';
@@ -383,7 +386,7 @@
       return chooseQuestion(x, r, pw && pw.meaning);
     }
     for (var i = 0; i < (w.pattern || []).length; i++) {
-      if ((x = pick(w.pattern[i].match))) return matchQuestion(x, r);
+      if ((x = pick(w.pattern[i].match))) return matchQuestion(x, r, w.pattern[i].key);
       if ((x = pick(w.pattern[i].conj))) return x.full ? patternFillQuestion(x, w.pattern[i].key, r) : conjQuestion(x, r);
     }
     if (w.rhetoric && (x = pick(w.rhetoric.quiz))) return rhetoricQuestion(x, w.rhetoric.cards, r);
