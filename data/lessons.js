@@ -1,6 +1,6 @@
 /* 公開的課次清單（不含課文內容）：康軒國語四上 */
 window.H3A_LESSONS = [
-  { id: 'L01', title: '水陸小高手', open: false },
+  { id: 'L01', title: '水陸小高手', open: true },
   { id: 'L02', title: '放學後', open: false },
   { id: 'L03', title: '我的籃球夢', open: false },
   { id: 'L04', title: '永遠的馬偕', open: false },
