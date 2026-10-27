@@ -175,7 +175,7 @@
       words: [
         { word: '千變萬化', meaning: '一下這樣、一下那樣，變化非常多。', img: 'changing-clouds.png' },
         { word: '不知不覺', meaning: '自己都沒有發現，就已經這樣了。', img: 'time-flies.png' },
-        { word: '不知所措', meaning: '慌張得不知道該怎麼辦才好。', img: 'wd-panic.png' }
+        { word: '不知所措', meaning: '慌張得不知道該怎麼辦才好。', img: 'imagine-top.png' }
       ],
       choose: [
         { id: 'pw1', word: '千變萬化', options: ['海邊的天空千變萬化，一下晴天一下下雨。', '這顆石頭放了一百年，千變萬化，一點也沒變。'], clue: '提示：想一想，「千變萬化」是變化很多，還是都沒變？', explain: '第一句用得對：天空一下晴一下雨，變化很多。石頭一點也沒變，剛好相反。' },
