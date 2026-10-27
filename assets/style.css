@@ -1067,9 +1067,10 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-unlock input { font: inherit; padding: 4px 8px; width: 10em; }
 .ws-items.ws-key { columns: 2; }
 .ws-paper.ws-plain, .ws-paper.ws-plain *:not(.ws-zk) { font-family: var(--font) !important; }
+.ws-paper.ws-land .ws-sheet { max-width: 297mm; }
+.ws-paper.ws-land .ws-items.ws-two { grid-template-columns: 1fr 1fr 1fr; }
 @media (max-width: 600px) { .ws-sheet { padding: 16px; font-size: 17px; } }
 @media print {
-  @page { size: A4; margin: 12mm; }
   html, body { background: #fff !important; }
   .topbar, .voice-bar, .ws-controls { display: none !important; }
   main, .ws-preview { margin: 0 !important; padding: 0 !important; max-width: none !important; }

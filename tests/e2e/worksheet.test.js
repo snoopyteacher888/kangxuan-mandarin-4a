@@ -53,6 +53,10 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   assert.equal(await p.locator('.ws-paper.ws-plain').count(), 1);
   await p.locator('.ws-check', { hasText: '印注音' }).locator('input').check();
   assert.equal(await p.locator('.ws-paper.ws-plain').count(), 0);
+  // 橫式：A4 橫印
+  await p.locator('.ws-check', { hasText: '橫式' }).locator('input').check();
+  assert.equal(await p.locator('.ws-paper.ws-land').count(), 1);
+  assert.match(await p.locator('#ws-page-style').textContent(), /landscape/);
   // 列印時隱藏控制列
   await p.emulateMedia({ media: 'print' });
   assert.equal(await p.locator('.ws-controls').isVisible(), false);

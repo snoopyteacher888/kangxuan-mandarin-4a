@@ -39,7 +39,7 @@
       })));
       sheet.appendChild(box);
     });
-    var wrap = h('div', { class: 'ws-paper' + (opts.zhuyin ? '' : ' ws-plain') }, sheet);
+    var wrap = h('div', { class: 'ws-paper' + (opts.zhuyin ? '' : ' ws-plain') + (opts.land ? ' ws-land' : '') }, sheet);
     if (opts.answers) {
       var key = h('div', { class: 'ws-sheet ws-answers' }, h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學習單（參考答案）'));
       sections.forEach(function (sec, i) {
@@ -51,10 +51,17 @@
     return wrap;
   }
 
+  /* 列印方向：@page 不能用 class 切換，所以換一段 <style> */
+  function pageStyle(land) {
+    var el = document.getElementById('ws-page-style');
+    if (!el) { el = document.createElement('style'); el.id = 'ws-page-style'; document.head.appendChild(el); }
+    el.textContent = '@media print { @page { size: A4 ' + (land ? 'landscape' : 'portrait') + '; margin: 12mm; } }';
+  }
+
   H3A.pages.worksheet = function (main, ctx) {
     var list = lessonsWithWords();
     if (!list.length) { main.appendChild(h('p', { class: 'notice' }, '還沒有可以印的課次。')); return; }
-    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, seed: 1, lesson: null, locked: false };
+    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, land: false, seed: 1, lesson: null, locked: false };
     if (!list.some(function (l) { return l.id === state.id; })) state.id = list[0].id;
     var controls = h('div', { class: 'ws-controls' });
     var preview = h('div', { class: 'ws-preview' });
@@ -97,10 +104,12 @@
       if (state.locked) controls.appendChild(unlockRow());
       controls.appendChild(h('div', { class: 'ws-row' },
         check('附參考答案（另一頁）', state.answers, function (on) { state.answers = on; }),
-        check('印注音', state.zhuyin, function (on) { state.zhuyin = on; })));
+        check('印注音', state.zhuyin, function (on) { state.zhuyin = on; }),
+        check('橫式（A4 橫印）', state.land, function (on) { state.land = on; }, { class: 'ws-landbox' })));
       controls.appendChild(h('div', { class: 'ws-row' },
         h('button', { type: 'button', class: 'btn btn-primary ws-print', onclick: function () { root.print(); } }, '🖨️ 列印'),
         h('button', { type: 'button', class: 'btn ws-shuffle', onclick: function () { state.seed += 1; draw(); } }, '🔀 換一份題目')));
+      pageStyle(state.land);
       var meta = list.filter(function (l) { return l.id === state.id; })[0];
       var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson);
       if (!sections.length) { preview.appendChild(h('p', { class: 'notice' }, '請至少選一種題型。')); return; }
