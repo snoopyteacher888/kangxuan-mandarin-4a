@@ -14,7 +14,7 @@
     { key: 'pattern', title: '句型練習', need: 'pattern' },
     { key: 'rhetoric', title: '修辭小偵探', need: 'rhetoric' }
   ];
-  var MAX = { zhuyin: 15, vocab: 10, similar: 8, fix: 8, idiom: 5, pattern: 6, rhetoric: 6 };
+  var MAX = { zhuyin: 10, vocab: 10, similar: 8, fix: 8, idiom: 5, pattern: 6, rhetoric: 6 };
 
   function has(words, key) {
     var v = words && words[key];
@@ -25,31 +25,35 @@
   function available(words) { return SECTIONS.filter(function (s) { return has(words, s.need); }); }
   /* 連在一起的「＿」換成一條長底線（寫字的空格） */
   function blank(text) { return text.replace(/＿+/g, '＿＿＿＿'); }
+  /* 括號空格：（　　　　） */
+  function paren(text) { return text.replace(/＿+/g, '（　　　　）'); }
   function take(list, n, r) { return quizgen.shuffle(list, r).slice(0, n); }
 
   var MAKE = {
     zhuyin: function (w, r) {
-      return { title: '看注音寫國字', say: '把注音寫成國字。',
+      return { title: '看注音寫國字', say: '看注音，在空格裡寫出國字。',
         items: take(w.hanzi, MAX.zhuyin, r).map(function (h) {
-          return { q: h.cloze.replace('＿', '（' + h.zhuyin + '）'), a: h.cloze.replace('＿', h.char) };
-        }), layout: 'grid' };
+          /* boxes：一格一個字，要寫的那一格是空的、旁邊印注音（直書格子） */
+          var boxes = h.cloze.split('').map(function (c) { return c === '＿' ? { zhuyin: h.zhuyin } : { char: c }; });
+          return { q: h.cloze.replace('＿', '（' + h.zhuyin + '）'), a: h.cloze.replace('＿', h.char), boxes: boxes };
+        }), layout: 'boxes' };
     },
     vocab: function (w, r) {
       var list = take(w.vocab.filter(function (v) { return v.example && v.example.indexOf('＿') >= 0; }), MAX.vocab, r);
       return { title: '語詞填空', say: '從語詞盒裡選出適當的語詞，寫在句子裡。',
         bank: quizgen.shuffle(list.map(function (v) { return v.word; }), r),
-        items: list.map(function (v) { return { q: blank(v.example), a: v.word }; }) };
+        items: list.map(function (v) { return { q: paren(v.example), a: v.word }; }) };
     },
     similar: function (w, r) {
-      return { title: '形近字選選看', say: '圈出正確的字，寫在空格裡。',
+      return { title: '形近字選選看', say: '圈出括號裡正確的字。',
         items: take(w.similar, MAX.similar, r).map(function (s) {
-          return { q: blank(s.sentence) + '（' + quizgen.shuffle(s.options, r).join('／') + '）', a: s.answer };
+          return { q: s.sentence.replace(/＿+/, '（' + quizgen.shuffle(s.options, r).join('　') + '）'), a: s.answer };
         }) };
     },
     fix: function (w, r) {
-      return { title: '改錯字', say: '每一句都有一個錯字，把它圈起來，再把正確的字寫在括號裡。',
+      return { title: '改錯字', say: '每一句都有一個錯字，把它圈起來，再把正確的字寫在前面的括號裡。',
         items: take(w.fix, MAX.fix, r).map(function (f) {
-          return { q: f.sentence.replace(f.char, f.wrong) + '（　　）', a: f.wrong + ' → ' + f.char };
+          return { q: '（　　）' + f.sentence.replace(f.char, f.wrong), a: f.wrong + ' → ' + f.char };
         }) };
     },
     idiom: function (w, r) {

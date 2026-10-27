@@ -1036,7 +1036,7 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-check { display: inline-flex; align-items: center; gap: 4px; }
 .ws-lesson { font: inherit; padding: 4px 8px; }
 .ws-paper { display: grid; gap: 24px; justify-items: center; }
-.ws-sheet { background: #fff; color: #000; width: 100%; max-width: 210mm; box-sizing: border-box; padding: 14mm 14mm 18mm; box-shadow: 0 2px 10px rgba(0,0,0,.12); line-height: 1.9; }
+.ws-sheet { background: #fff; color: #000; width: 100%; max-width: 210mm; box-sizing: border-box; padding: 14mm 14mm 18mm; box-shadow: 0 2px 10px rgba(0,0,0,.12); line-height: 2; font-size: 21px; }
 .ws-title { text-align: center; font-size: 1.5em; margin: 0 0 6px; }
 .ws-who { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .ws-sec { break-inside: avoid; page-break-inside: avoid; margin-top: 12px; }
@@ -1045,16 +1045,29 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-bank { display: flex; flex-wrap: wrap; gap: 4px 14px; border: 1.5px dashed #888; border-radius: 8px; padding: 4px 12px; margin-bottom: 6px; }
 .ws-items { margin: 0; padding-left: 2.8em; }
 .ws-items li { break-inside: avoid; }
-.ws-items.ws-grid { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 1.5em; }
+/* 直書格子 */
+.ws-cols { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: row-reverse; flex-wrap: wrap; gap: 12px 7px; line-height: 1; }
+.ws-col { display: flex; flex-direction: column; align-items: center; break-inside: avoid; }
+.ws-no { font-size: .8em; margin-bottom: 4px; }
+.ws-box { box-sizing: border-box; width: 2.9em; height: 2.7em; border: 1.5px solid #666; margin-top: -1.5px; display: flex; align-items: center; justify-content: center; }
+.ws-zk { font-family: 'Bpmf Zihi Kai Std', "LXGW WenKai TC", serif; font-size: 1.7em; }
+.ws-paper .ws-box .ws-zk { font-family: 'Bpmf Zihi Kai Std', "LXGW WenKai TC", serif !important; }
+.ws-blank { justify-content: stretch; }
+.ws-cell { flex: 1; align-self: stretch; }
+.ws-zy { width: 1.35em; box-sizing: border-box; padding-right: .3em; align-self: stretch; border-left: 1px dashed #aaa; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .6em; line-height: 1.05; font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif !important; }
+.ws-zrow { display: flex; align-items: flex-end; }
+.ws-zs { display: flex; flex-direction: column; align-items: center; }
+.ws-tone { width: 0; overflow: visible; transform: translateY(-.25em); }
+.ws-light { line-height: .6; }
 .ws-items li.ws-line { padding-bottom: 0.9em; }
 .ws-items.ws-key { columns: 2; }
-.ws-paper.ws-plain, .ws-paper.ws-plain * { font-family: var(--font) !important; }
-@media (max-width: 600px) { .ws-sheet { padding: 16px; } .ws-items.ws-grid { grid-template-columns: repeat(2, 1fr); } }
+.ws-paper.ws-plain, .ws-paper.ws-plain *:not(.ws-zk) { font-family: var(--font) !important; }
+@media (max-width: 600px) { .ws-sheet { padding: 16px; font-size: 17px; } }
 @media print {
   @page { size: A4; margin: 12mm; }
   html, body { background: #fff !important; }
   .topbar, .voice-bar, .ws-controls { display: none !important; }
   main, .ws-preview { margin: 0 !important; padding: 0 !important; max-width: none !important; }
-  .ws-sheet { box-shadow: none; padding: 0; max-width: none; }
+  .ws-sheet { box-shadow: none; padding: 0; max-width: none; font-size: 15.5pt; }
   .ws-answers { break-before: page; page-break-before: always; }
 }

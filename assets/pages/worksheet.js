@@ -8,6 +8,22 @@
     return (root.H3A_LESSONS || []).filter(function (l) { return root.H3A_WORDS && root.H3A_WORDS[l.id]; });
   }
 
+  var TONE = /[ˊˇˋ˙]/;
+  /* 直書格子：一個語詞一直行，從右往左排；要寫的格子空白，右邊印注音 */
+  function boxes(items) {
+    return h('ol', { class: 'ws-cols' }, items.map(function (it, i) {
+      return h('li', { class: 'ws-col' }, h('span', { class: 'ws-no' }, String(i + 1)), it.boxes.map(function (b) {
+        if (b.char) return h('span', { class: 'ws-box' }, h('span', { class: 'ws-zk' }, H3A.zhuyin ? H3A.zhuyin.mark(b.char) : b.char));
+        var sym = b.zhuyin.split('').filter(function (c) { return !TONE.test(c); });
+        var tone = (b.zhuyin.match(/[ˊˇˋ]/) || [''])[0], light = b.zhuyin.indexOf('˙') >= 0;
+        return h('span', { class: 'ws-box ws-blank' }, h('span', { class: 'ws-cell' }),
+          h('span', { class: 'ws-zy' }, light ? h('span', { class: 'ws-light' }, '˙') : null,
+            h('span', { class: 'ws-zrow' }, h('span', { class: 'ws-zs' }, sym.map(function (c) { return h('span', {}, c); })),
+              tone ? h('span', { class: 'ws-tone' }, tone) : null)));
+      }));
+    }));
+  }
+
   function paper(meta, sections, opts) {
     var n = parseInt(meta.id.slice(1), 10);
     var sheet = h('div', { class: 'ws-sheet' },
@@ -17,7 +33,7 @@
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
         h('h2', {}, CN[i] + '、' + sec.title), h('p', { class: 'ws-say' }, sec.say));
       if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.map(function (b) { return h('span', {}, b); })));
-      box.appendChild(h('ol', { class: 'ws-items' + (sec.layout === 'grid' ? ' ws-grid' : '') }, sec.items.map(function (it) {
+      box.appendChild(sec.layout === 'boxes' ? boxes(sec.items) : h('ol', { class: 'ws-items' }, sec.items.map(function (it) {
         return h('li', { class: it.line ? 'ws-line' : '' }, it.q);
       })));
       sheet.appendChild(box);
@@ -54,7 +70,9 @@
         return h('label', { class: 'ws-check' }, h('input', Object.assign({ type: 'checkbox', checked: on, onchange: function (e) { flip(e.target.checked); draw(); } }, extra || {})), label);
       }
       controls.appendChild(h('div', { class: 'ws-row' }, h('label', {}, '課次：', select)));
+      var all = avail.every(function (s) { return state.keys.indexOf(s.key) >= 0; });
       controls.appendChild(h('div', { class: 'ws-row' }, h('span', { class: 'ws-label' }, '題型：'),
+        check('全選', all, function (on) { state.keys = on ? avail.map(function (s) { return s.key; }) : []; }, { class: 'ws-all' }),
         avail.map(function (s) {
           return check(s.title, state.keys.indexOf(s.key) >= 0, function (on) {
             state.keys = on ? state.keys.concat(s.key) : state.keys.filter(function (k) { return k !== s.key; });

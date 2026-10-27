@@ -19,11 +19,18 @@ for (const n of ids) {
       }
     }
     const zy = secs.find(s => s.key === 'zhuyin');
-    for (const it of zy.items) assert.ok(!/＿/.test(it.q) && !/＿/.test(it.a), it.q);
+    assert.ok(zy.items.length <= 10);
+    for (const it of zy.items) {
+      assert.ok(!/＿/.test(it.q) && !/＿/.test(it.a), it.q);
+      assert.equal(it.boxes.filter(b => b.zhuyin).length, 1);
+      assert.equal(it.boxes.map(b => b.char || '').join(''), it.a.replace(/[^]/g, (c, i) => it.boxes[i].char ? c : ''));
+    }
+    const sim = secs.find(s => s.key === 'similar');
+    if (sim) for (const it of sim.items) assert.ok(it.q.includes(it.a) && /（.+　.+）/.test(it.q) && !/＿/.test(it.q), it.q);
     const fix = secs.find(s => s.key === 'fix');
-    if (fix) for (const it of fix.items) { const [wr, ch] = it.a.split(' → '); assert.ok(it.q.includes(wr)); assert.notEqual(wr, ch); }
+    if (fix) for (const it of fix.items) { const [wr, ch] = it.a.split(' → '); assert.ok(it.q.startsWith('（　　）') && it.q.includes(wr)); assert.notEqual(wr, ch); }
     const voc = secs.find(s => s.key === 'vocab');
-    if (voc) for (const it of voc.items) assert.ok(voc.bank.includes(it.a) && !it.q.includes(it.a));
+    if (voc) for (const it of voc.items) assert.ok(voc.bank.includes(it.a) && !it.q.includes(it.a) && it.q.includes('（　　　　）') && !/＿/.test(it.q));
   });
 }
 test('worksheet: same seed same sheet, other seed differs', () => {

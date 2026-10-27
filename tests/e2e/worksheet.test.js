@@ -26,6 +26,18 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   await p.uncheck('input[data-key="fix"]');
   assert.equal(await p.locator('.ws-sheet:not(.ws-answers) .ws-sec').count(), secs - 1);
   assert.equal(await p.locator('.ws-fix').count(), 0);
+  // 全選：取消全部、再全選
+  assert.equal(await p.isChecked('.ws-all'), false);
+  await p.check('.ws-all');
+  assert.equal(await p.locator('.ws-sheet:not(.ws-answers) .ws-sec').count(), secs);
+  await p.uncheck('.ws-all');
+  assert.equal(await p.locator('.ws-sheet').count(), 0);
+  await p.check('.ws-all');
+  assert.equal(await p.locator('.ws-sheet:not(.ws-answers) .ws-sec').count(), secs);
+  // 看注音寫國字：直書格子，10 題，每題一個空格
+  assert.equal(await p.locator('.ws-col').count(), 10);
+  assert.equal(await p.locator('.ws-box.ws-blank').count(), 10);
+  await p.uncheck('input[data-key="fix"]');
   // 換課
   await p.selectOption('.ws-lesson', 'L12');
   assert.match(await p.locator('.ws-title').first().innerText(), /第 12 課/);
