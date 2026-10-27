@@ -19,6 +19,9 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   await p.click('.ws-open');
   await p.waitForSelector('.ws-sheet');
   assert.match(await p.locator('.ws-title').first().innerText(), /第 1 課/);
+  // 沒有教室密碼：顯示輸入密碼，沒有閱讀理解
+  await p.waitForSelector('.ws-unlock');
+  assert.equal(await p.locator('.ws-reading').count(), 0);
   const secs = await p.locator('.ws-sheet:not(.ws-answers) .ws-sec').count();
   assert.ok(secs >= 5);
   assert.equal(await p.locator('.ws-answers').count(), 1);

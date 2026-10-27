@@ -33,8 +33,9 @@
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
         h('h2', {}, CN[i] + '、' + sec.title), h('p', { class: 'ws-say' }, sec.say));
       if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.map(function (b) { return h('span', {}, b); })));
-      box.appendChild(sec.layout === 'boxes' ? boxes(sec.items) : h('ol', { class: 'ws-items' }, sec.items.map(function (it) {
-        return h('li', { class: it.line ? 'ws-line' : '' }, it.q);
+      box.appendChild(sec.layout === 'boxes' ? boxes(sec.items) : h('ol', { class: 'ws-items' + (sec.layout === 'two' ? ' ws-two' : '') }, sec.items.map(function (it) {
+        return h('li', { class: it.line ? 'ws-line' : '' }, it.q,
+          it.opts ? h('div', { class: 'ws-opts' }, it.opts.map(function (o) { return h('span', {}, o); })) : null);
       })));
       sheet.appendChild(box);
     });
@@ -53,18 +54,33 @@
   H3A.pages.worksheet = function (main, ctx) {
     var list = lessonsWithWords();
     if (!list.length) { main.appendChild(h('p', { class: 'notice' }, '還沒有可以印的課次。')); return; }
-    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, seed: 1 };
+    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, seed: 1, lesson: null, locked: false };
     if (!list.some(function (l) { return l.id === state.id; })) state.id = list[0].id;
     var controls = h('div', { class: 'ws-controls' });
     var preview = h('div', { class: 'ws-preview' });
     main.appendChild(controls); main.appendChild(preview);
 
     function words() { return root.H3A_WORDS[state.id]; }
+    /* 閱讀理解要用解開的課文：這台裝置記得金鑰就直接解，不然顯示輸入密碼 */
+    function load() {
+      var id = state.id; state.lesson = null; state.locked = false;
+      if (!H3A.session || !H3A.session.getLesson) { draw(); return; }
+      H3A.session.getLesson(id).then(function (l) { if (id === state.id) { state.lesson = l; state.keys = null; draw(); } },
+        function (err) { if (id === state.id) { state.locked = err && err.message === 'NEED_KEY'; draw(); } });
+    }
+    function unlockRow() {
+      var input = h('input', { type: 'password', class: 'ws-pw', autocomplete: 'off', 'aria-label': '教室密碼', placeholder: '教室密碼' });
+      var msg = h('span', { class: 'error' });
+      return h('form', { class: 'ws-row ws-unlock', onsubmit: function (e) {
+        e.preventDefault(); if (!input.value) return;
+        H3A.session.unlock(state.id, input.value).then(function () { load(); }, function () { msg.textContent = '密碼不對'; });
+      } }, h('span', {}, '🔒 輸入教室密碼，就能加入「課文閱讀理解」：'), input, h('button', { type: 'submit', class: 'btn' }, '解開'), msg);
+    }
     function draw() {
       H3A.ui.clear(controls); H3A.ui.clear(preview);
-      var avail = H3A.worksheet.available(words());
+      var avail = H3A.worksheet.available(words(), state.lesson);
       if (!state.keys) state.keys = avail.map(function (s) { return s.key; });
-      var select = h('select', { class: 'ws-lesson', onchange: function (e) { state.id = e.target.value; state.keys = null; state.seed = 1; draw(); } },
+      var select = h('select', { class: 'ws-lesson', onchange: function (e) { state.id = e.target.value; state.keys = null; state.seed = 1; load(); } },
         list.map(function (l) { return h('option', { value: l.id, selected: l.id === state.id }, '第 ' + parseInt(l.id.slice(1), 10) + ' 課 ' + l.title); }));
       function check(label, on, flip, extra) {
         return h('label', { class: 'ws-check' }, h('input', Object.assign({ type: 'checkbox', checked: on, onchange: function (e) { flip(e.target.checked); draw(); } }, extra || {})), label);
@@ -78,6 +94,7 @@
             state.keys = on ? state.keys.concat(s.key) : state.keys.filter(function (k) { return k !== s.key; });
           }, { 'data-key': s.key });
         })));
+      if (state.locked) controls.appendChild(unlockRow());
       controls.appendChild(h('div', { class: 'ws-row' },
         check('附參考答案（另一頁）', state.answers, function (on) { state.answers = on; }),
         check('印注音', state.zhuyin, function (on) { state.zhuyin = on; })));
@@ -85,10 +102,10 @@
         h('button', { type: 'button', class: 'btn btn-primary ws-print', onclick: function () { root.print(); } }, '🖨️ 列印'),
         h('button', { type: 'button', class: 'btn ws-shuffle', onclick: function () { state.seed += 1; draw(); } }, '🔀 換一份題目')));
       var meta = list.filter(function (l) { return l.id === state.id; })[0];
-      var sections = H3A.worksheet.build(words(), state.keys, state.seed);
+      var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson);
       if (!sections.length) { preview.appendChild(h('p', { class: 'notice' }, '請至少選一種題型。')); return; }
       preview.appendChild(paper(meta, sections, state));
     }
-    draw();
+    draw(); load();
   };
 })(this);

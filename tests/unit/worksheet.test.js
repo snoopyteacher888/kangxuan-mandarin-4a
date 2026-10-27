@@ -42,3 +42,21 @@ test('worksheet: only chosen sections', () => {
   const w = load('05'); assert.deepEqual(WS.build(w, ['fix'], 1).map(s => s.key), ['fix']);
   assert.deepEqual(WS.build(w, [], 1), []);
 });
+test('worksheet: rhetoric is multiple choice with the answer among the options', () => {
+  const w = load('03'); const sec = WS.build(w, ['rhetoric'], 2)[0];
+  for (const it of sec.items) { assert.ok(it.q.startsWith('（　）')); assert.ok(it.opts.includes(it.a)); assert.ok(it.opts.length >= 2); }
+});
+test('worksheet: makeword lists the char and its words', () => {
+  const w = load('03'); const sec = WS.build(w, ['makeword'], 1)[0];
+  assert.ok(sec.items.length > 0 && sec.items.length <= 8);
+  for (const it of sec.items) { const c = it.q[0]; assert.ok(it.a.startsWith(c + '：')); assert.ok(it.a.slice(2).split('、').every(x => x.includes(c))); }
+});
+test('worksheet: reading only with an unlocked lesson; options shuffled, answer kept', () => {
+  const w = load('03');
+  assert.ok(!WS.available(w).some(s => s.key === 'reading'));
+  const lesson = { quiz: [1, 2, 3].map(i => ({ prompt: '問題' + i, options: [{ text: '對' + i }, { text: '錯A' }, { text: '錯B' }, { text: '錯C' }], answer: 0 })) };
+  assert.ok(WS.available(w, lesson).some(s => s.key === 'reading'));
+  const sec = WS.build(w, ['reading'], 5, lesson)[0];
+  assert.equal(sec.items.length, 3);
+  for (const it of sec.items) { assert.match(it.a, /^[①②③④]對\d$/); assert.ok(it.opts.includes(it.a)); }
+});
