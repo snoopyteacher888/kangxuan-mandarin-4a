@@ -66,6 +66,8 @@
         return S(p.pick, r).map(function (x) { return Q.phrasePickQuestion(x, r); });
       } },
       { key: 'fill1', name: p.phrase2 ? '拼短語一' : '拼短語', say: '看圖，把每一塊拖到對的空格裡。', make: function (r) {
+        /* 短語比較長、看圖選詞只挖一塊時，可以自己寫好切塊（p.fill，每格說明用 intro 的每一塊） */
+        if (p.fill) return S(p.fill, r).map(function (x) { return Q.patternFillQuestion(phrase2Fill(p, x), null, r); });
         return S(p.pick, r).slice(0, 5).map(function (x) { return Q.patternFillQuestion(phrase1Fill(p, x), null, r); });
       } },
       p.say.length ? { key: 'say', name: '看圖說說看', say: '看圖，用短語說說看。', make: function () { return p.say.map(sayQ); } } : {},
