@@ -37,7 +37,7 @@ function start(port, opts = {}) {
     if (opts.encFiles && opts.encFiles[file]) { res.setHeader('Content-Type', TYPES['.js']); return fs.createReadStream(opts.encFiles[file]).pipe(res); }
     if (file === '/data/lesson06.enc.js') { if (opts.encFile) { res.setHeader('Content-Type', TYPES['.js']); return fs.createReadStream(opts.encFile).pipe(res); } file = '/tests/fixtures/fake06.enc.js'; }
     /* 共用功能的測試用三年級第 6 課的字詞資料（tests/fixtures/lesson06.words.js）當範例，圖片用一張空白圖代替 */
-    if (file === '/data/lesson06.words.js') file = '/tests/fixtures/lesson06.words.js';
+    if (file === '/data/lesson06.words.js' && !opts.realWords) file = '/tests/fixtures/lesson06.words.js';
     if (/^\/images\/L06\//.test(file) && !fs.existsSync(path.join(ROOT, decodeURIComponent(file)))) file = '/tests/fixtures/placeholder.png';
     /* openLessons：測試還沒公開的課次；第 6 課（測試範例）一律打開 */
     if (file === '/data/lessons.js') {
