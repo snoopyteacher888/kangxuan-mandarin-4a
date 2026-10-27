@@ -7,9 +7,9 @@ window.H3A_LESSONS = [
   { id: 'L05', title: '假如給我三天光明', open: true },
   { id: 'L06', title: '攀登生命的高峰', open: true },
   { id: 'L07', title: '美味的一堂課', open: true },
-  { id: 'L08', title: '建築界的長頸鹿', open: false },
-  { id: 'L09', title: '請到我的家鄉來', open: false },
-  { id: 'L10', title: '奇幻旋律', open: false },
-  { id: 'L11', title: '兔子先生等等我', open: false },
-  { id: 'L12', title: '老鞋匠和小精靈', open: false }
+  { id: 'L08', title: '建築界的長頸鹿', open: true },
+  { id: 'L09', title: '請到我的家鄉來', open: true },
+  { id: 'L10', title: '奇幻旋律', open: true },
+  { id: 'L11', title: '兔子先生等等我', open: true },
+  { id: 'L12', title: '老鞋匠和小精靈', open: true }
 ];
