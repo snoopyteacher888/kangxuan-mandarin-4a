@@ -16,5 +16,8 @@
         l.open ? null : h('span', { class: 'soon' }, '即將推出')));
     });
     main.appendChild(grid);
+    /* 學習單印製（老師要求） */
+    main.appendChild(h('div', { class: 'home-tools' },
+      h('button', { type: 'button', class: 'btn ws-open', onclick: function () { ctx.go('#/worksheet'); } }, '🖨️ 學習單印製')));
   };
 })(this);

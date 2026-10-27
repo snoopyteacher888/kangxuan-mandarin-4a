@@ -36,6 +36,8 @@
     var settings = H3A.session.settings();
     if (!p.length) { /* 首頁上方只放橘色的「康軒國語四上」，放中間（老師要求） */
       H3A.pages.home(shell({ title: '康軒國語四上', brand: true }), { go: go, settings: settings }); return; }
+    if (p[0] === 'worksheet') {
+      H3A.pages.worksheet(shell({ back: '#/', title: '學習單印製' }), { go: go, settings: settings, params: { l: p[1] } }); return; }
     if (p[0] === 'settings' || p[0] === 'teacher') {
       var name = p[0] === 'teacher' && p[1] === 'encrypt' ? 'encrypt' : p[0];
       if (!H3A.pages[name]) { go('#/'); return; }
