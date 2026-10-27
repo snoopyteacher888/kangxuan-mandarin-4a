@@ -27,21 +27,24 @@
   function paper(meta, sections, opts) {
     var n = parseInt(meta.id.slice(1), 10);
     var sheet = h('div', { class: 'ws-sheet' },
-      h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學習單'),
-      h('div', { class: 'ws-who' }, h('span', {}, '姓名：＿＿＿＿＿＿'), h('span', {}, '座號：＿＿＿'), h('span', {}, '日期：＿＿＿＿＿＿')));
+      h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學輔班學習單'),
+      h('div', { class: 'ws-who' }, h('span', {}, '姓名：＿＿＿＿＿＿'), h('span', {}, '日期：＿＿＿＿＿＿')));
     sections.forEach(function (sec, i) {
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
         h('h2', {}, CN[i] + '、' + sec.title), h('p', { class: 'ws-say' }, sec.say));
       if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.map(function (b) { return h('span', {}, b); })));
       box.appendChild(sec.layout === 'boxes' ? boxes(sec.items) : h('ol', { class: 'ws-items' + (sec.layout === 'two' ? ' ws-two' : '') }, sec.items.map(function (it) {
-        return h('li', { class: it.line ? 'ws-line' : '' }, it.q,
-          it.opts ? h('div', { class: 'ws-opts' }, it.opts.map(function (o) { return h('span', {}, o); })) : null);
+        /* 前面有（　）的題目：換行時對齊題目的第一個字（老師要求） */
+        var m = /^(（[　]+）)(.*)$/.exec(it.q);
+        var opts = it.opts ? h('div', { class: 'ws-opts' }, it.opts.map(function (o) { return h('span', {}, o); })) : null;
+        if (m) return h('li', { class: 'ws-hang' + (it.line ? ' ws-line' : '') }, h('span', { class: 'ws-pre' }, m[1]), h('div', { class: 'ws-body' }, m[2], opts));
+        return h('li', { class: it.line ? 'ws-line' : '' }, it.q, opts);
       })));
       sheet.appendChild(box);
     });
     var wrap = h('div', { class: 'ws-paper' + (opts.zhuyin ? '' : ' ws-plain') + (opts.land ? ' ws-land' : '') }, sheet);
     if (opts.answers) {
-      var key = h('div', { class: 'ws-sheet ws-answers' }, h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學習單（參考答案）'));
+      var key = h('div', { class: 'ws-sheet ws-answers' }, h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學輔班學習單（參考答案）'));
       sections.forEach(function (sec, i) {
         key.appendChild(h('section', { class: 'ws-sec' }, h('h2', {}, CN[i] + '、' + sec.title),
           h('ol', { class: 'ws-items ws-key' }, sec.items.map(function (it) { return h('li', {}, it.a); }))));

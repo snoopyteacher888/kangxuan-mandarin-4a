@@ -1064,6 +1064,9 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-items.ws-two { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1em; }
 .ws-items.ws-two li { white-space: nowrap; }
 .ws-opts { display: flex; flex-wrap: wrap; gap: 0 1.6em; padding-left: 2.2em; }
+.ws-items li.ws-hang > .ws-pre { float: left; }
+.ws-items li.ws-hang > .ws-body { overflow: hidden; }
+.ws-body .ws-opts { padding-left: 1em; }
 .ws-unlock input { font: inherit; padding: 4px 8px; width: 10em; }
 .ws-items.ws-key { columns: 2; }
 .ws-paper.ws-plain, .ws-paper.ws-plain *:not(.ws-zk) { font-family: var(--font) !important; }
