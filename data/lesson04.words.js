@@ -65,7 +65,7 @@
       { id: 'cw-醫', char: '醫', img: 'cw-doctor.png', charMeaning: '治病；幫人看病的人。', word: '醫生', meaning: '幫人看病、開藥的人。', example: '我發燒了，媽媽帶我去看＿＿。', options: ['醫生', '命令', '翻書', '濃湯'] },
       { id: 'cw-命', char: '命', img: 'cw-order.png', charMeaning: '叫別人做事；活著的力量。', word: '命令', meaning: '叫別人一定要照著做的話。', example: '隊長下了＿＿，大家馬上排好隊。', options: ['命令', '奉茶', '貢獻', '治好'] },
       { id: 'cw-奉', char: '奉', img: 'serve-tea.png', charMeaning: '很恭敬的送上。', word: '奉茶', meaning: '很有禮貌的把茶端給別人喝。', example: '客人來了，我幫忙＿＿。', options: ['奉茶', '吃藥', '捐血', '翻書'] },
-      { id: 'cw-獻', char: '獻', img: 'cw-contribute.png', charMeaning: '恭敬的送給別人。', word: '貢獻', meaning: '對大家有幫助的付出。', example: '發明電燈的人，對世界有很大的＿＿。', options: ['貢獻', '宿舍', '山嶺', '醫生'] },
+      { id: 'cw-獻', char: '獻', img: 'give-heart.png', charMeaning: '恭敬的送給別人。', word: '貢獻', meaning: '對大家有幫助的付出。', example: '發明電燈的人，對世界有很大的＿＿。', options: ['貢獻', '宿舍', '山嶺', '醫生'] },
       { id: 'cw-療', char: '療', img: 'bandage.png', charMeaning: '把病醫好。', word: '治療', meaning: '用藥或其他方法，讓病快點好。', example: '醫生幫受傷的小狗＿＿。', options: ['治療', '奉茶', '偕同', '禮堂'] },
       { id: 'cw-衛', char: '衛', img: 'cw-tissue.png', charMeaning: '保護；保持乾淨。', word: '衛生紙', meaning: '擦手、擦嘴用的軟軟的紙。', example: '打噴嚏的時候，要拿＿＿＿遮住口鼻。', options: ['衛生紙', '醫生', '宿舍', '貢獻'] },
       { id: 'cw-藥', char: '藥', img: 'medicine.png', charMeaning: '可以治病的東西。', word: '吃藥', meaning: '把醫生開的藥吞下去，讓病快點好。', example: '感冒了，要按時＿＿。', options: ['吃藥', '捐血', '命令', '濃湯'] },
