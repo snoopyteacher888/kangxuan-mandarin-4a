@@ -36,6 +36,16 @@
     var settings = H3A.session.settings();
     if (!p.length) { /* 首頁上方只放橘色的「康軒國語四上」，放中間（老師要求） */
       H3A.pages.home(shell({ title: '康軒國語四上', brand: true }), { go: go, settings: settings }); return; }
+    if (p[0] === 'who') { /* 選擇身分：全班（要老師密碼）或自己的動物 */
+      H3A.pages.picker(shell({ back: '#/', title: '你是誰？' }), {
+        go: go, allowClass: true, onPick: function (id) {
+          if (id === 'class') H3A.session.saveSettings({ mode: 'class', student: null });
+          else H3A.session.saveSettings({ mode: 'student', student: id });
+          go('#/');
+        }
+      });
+      return;
+    }
     if (p[0] === 'worksheet') {
       H3A.pages.worksheet(shell({ back: '#/', title: '學習單印製' }), { go: go, settings: settings, params: { l: p[1] } }); return; }
     if (p[0] === 'settings' || p[0] === 'teacher') {

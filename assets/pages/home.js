@@ -17,7 +17,9 @@
     });
     main.appendChild(grid);
     /* 學習單印製（老師要求） */
+    var me = ctx.settings.mode === 'class' ? H3A.session.studentInfo('class') : ctx.settings.student ? H3A.session.studentInfo(ctx.settings.student) : null;
     main.appendChild(h('div', { class: 'home-tools' },
+      h('button', { type: 'button', class: 'btn who-open', onclick: function () { ctx.go('#/who'); } }, me ? me.emoji + ' ' + me.name + '（換人）' : '👤 選擇身分'),
       h('button', { type: 'button', class: 'btn ws-open', onclick: function () { ctx.go('#/worksheet'); } }, '🖨️ 學習單印製')));
   };
 })(this);

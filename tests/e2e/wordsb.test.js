@@ -382,3 +382,16 @@ test('teacher roster masks a full name to the middle character', async () => {
   assert.equal(await t.inputValue(inp), 'O宥O');
   assert.deepEqual(t.errors, []);
 });
+
+test('who page: pick an animal, or whole class with teacher password', async () => {
+  const p = await page(); await p.goto(BASE + '#/who');
+  await p.click('.picker-card[data-student="bear"]');
+  await p.waitForSelector('.who-open >> text=小熊（換人）');
+  await p.click('.who-open');
+  await p.click('.picker-card[data-student="class"]');
+  await p.fill('.class-pass input[type=password]', 'wrong'); await p.click('.class-pass button[type=submit]');
+  await p.waitForSelector('.class-pass .error >> text=密碼不對');
+  await p.fill('.class-pass input[type=password]', 'teacher-pass'); await p.click('.class-pass button[type=submit]');
+  await p.waitForSelector('.who-open >> text=全班（換人）');
+  assert.deepEqual(p.errors, []);
+});
