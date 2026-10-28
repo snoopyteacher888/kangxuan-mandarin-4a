@@ -2,10 +2,22 @@
 (function (root) {
   var H3A = root.H3A; var h = H3A.ui.h;
   var ANIMALS = [['bear', '🐻', '小熊'], ['rabbit', '🐰', '兔子'], ['cat', '🐱', '小貓'], ['dog', '🐶', '小狗'], ['panda', '🐼', '熊貓'],
-    ['tiger', '🐯', '老虎'], ['lion', '🦁', '獅子'], ['monkey', '🐵', '猴子'], ['pig', '🐷', '小豬'], ['frog', '🐸', '青蛙'],
-    ['penguin', '🐧', '企鵝'], ['fox', '🦊', '狐狸']];
+    ['tiger', '🐯', '老虎'], ['lion', '🦁', '獅子'], ['monkey', '🐵', '猴子'], ['frog', '🐸', '青蛙'], ['penguin', '🐧', '企鵝'],
+    ['fox', '🦊', '狐狸'], ['koala', '🐨', '無尾熊'], ['hamster', '🐹', '倉鼠'], ['unicorn', '🦄', '獨角獸'], ['dolphin', '🐬', '海豚'],
+    ['owl', '🦉', '貓頭鷹'], ['turtle', '🐢', '烏龜'], ['butterfly', '🦋', '蝴蝶'], ['whale', '🐳', '鯨魚'], ['giraffe', '🦒', '長頸鹿'],
+    ['elephant', '🐘', '大象'], ['hedgehog', '🦔', '刺蝟'], ['squirrel', '🐿️', '松鼠'], ['parrot', '🦜', '鸚鵡'], ['ladybug', '🐞', '瓢蟲'],
+    ['deer', '🦌', '小鹿'], ['chick', '🐥', '小雞'], ['seal', '🦭', '海豹'], ['octopus', '🐙', '章魚'], ['horse', '🐴', '小馬']];
   var RESULT = { first: '✅ 第一次就答對', hint1: '🟡 答錯 1 次後答對', hint2: '🟠 答錯 2 次後答對', taught: '📘 答錯 3 次，看了老師說明', wrong: '❌ 答錯', pending: '👩‍🏫 等老師批改' };
   var PLACE = { home: '家裡', school: '學校' };
+  /* 名冊只留名字中間的字：王宥廷 → O宥O、陳安 → O安、歐陽宥廷 → OO宥O；不是 2～4 個中文字或是動物名稱就照原樣 */
+  function maskName(s) {
+    s = String(s || '').trim();
+    if (!/^[\u3400-\u9fff]{2,4}$/.test(s) || ANIMALS.some(function (a) { return a[2] === s; })) return s;
+    if (s.length === 2) return 'O' + s[1];
+    if (s.length === 3) return 'O' + s[1] + 'O';
+    return 'OO' + s[2] + 'O';
+  }
+  H3A.pages = H3A.pages || {}; H3A.pages.maskName = maskName;
 
   function token() { try { return root.sessionStorage.getItem('k4a.token'); } catch (e) { return H3A.tokenMem || null; } }
   function setToken(t) { try { if (t) root.sessionStorage.setItem('k4a.token', t); else root.sessionStorage.removeItem('k4a.token'); } catch (e) { H3A.tokenMem = t; } }
@@ -170,7 +182,7 @@
     function showRoster() {
       H3A.ui.clear(rosterBox);
       rosterBox.appendChild(h('h2', {}, '學生名冊'));
-      rosterBox.appendChild(h('p', { class: 'small' }, '網站上只用動物代號，不放真實姓名。代號是誰，請記在您自己的筆記裡。'));
+      rosterBox.appendChild(h('p', { class: 'small' }, '輸入學生的名字（例如王宥廷），會自動變成 O宥O，只留中間那個字，完整姓名不會存到網站上。'));
       var rows = roster.map(function (r) { return { id: r.id, emoji: r.emoji, name: r.name }; });
       var list = h('div', { class: 'roster-list' });
       function draw() {
@@ -178,6 +190,7 @@
         rows.forEach(function (r, i) {
           var name = h('input', { type: 'text', class: 'big-input', value: r.name, maxlength: '10', 'aria-label': '顯示名稱' });
           name.addEventListener('input', function () { r.name = name.value; });
+          name.addEventListener('blur', function () { r.name = name.value = maskName(name.value); });
           list.appendChild(h('div', { class: 'form-row' }, h('span', { class: 'picker-emoji' }, r.emoji), name,
             h('button', { type: 'button', class: 'btn-secondary', onclick: function () { rows.splice(i, 1); draw(); } }, '刪除')));
         });
@@ -193,6 +206,7 @@
       var msg = h('span', { class: 'saved' });
       rosterBox.appendChild(list);
       rosterBox.appendChild(h('button', { type: 'button', class: 'btn-primary', onclick: function () {
+        rows.forEach(function (r) { r.name = maskName(r.name); });
         H3A.api.call('saveRoster', { token: token(), roster: rows }).then(function (res) {
           if (res.error === 'AUTH') { setToken(null); login(main, ctx); return; }
           if (res.error) { msg.textContent = '儲存失敗：名稱要 1～10 個字'; return; }

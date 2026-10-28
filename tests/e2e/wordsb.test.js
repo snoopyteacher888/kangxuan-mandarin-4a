@@ -372,3 +372,13 @@ test('語音聽錯的常見詞會改回來：爬上述 → 爬上樹（老師回
   const t = await p.textContent('.said-box strong');
   assert.ok(t.includes('爬上樹') && !t.includes('上述'), t);
 });
+
+test('teacher roster masks a full name to the middle character', async () => {
+  const t = await page(); await t.goto(BASE + '#/teacher');
+  await t.fill('input[type=password]', 'teacher-pass'); await t.click('button[type=submit]');
+  const inp = '.roster-list input[aria-label="顯示名稱"]';
+  await t.waitForSelector(inp);
+  await t.fill(inp, '王宥廷'); await t.press(inp, 'Tab');
+  assert.equal(await t.inputValue(inp), 'O宥O');
+  assert.deepEqual(t.errors, []);
+});
