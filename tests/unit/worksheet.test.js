@@ -20,11 +20,16 @@ for (const n of ids) {
     }
     const zy = secs.find(s => s.key === 'zhuyin');
     assert.ok(zy.items.length <= 10);
-    for (const it of zy.items) {
-      assert.ok(!/＿/.test(it.q) && !/＿/.test(it.a), it.q);
-      assert.equal(it.boxes.filter(b => b.zhuyin).length, 1);
-      assert.equal(it.boxes.map(b => b.char || '').join(''), it.a.replace(/[^]/g, (c, i) => it.boxes[i].char ? c : ''));
-    }
+    const half = Math.ceil(zy.items.length / 2);
+    zy.items.forEach((it, i) => {
+      assert.equal(it.kind, i < half ? 'char' : 'zy');
+      assert.ok(!/＿/.test(it.q) && /（　+）/.test(it.q), it.q);
+      const h = w.hanzi.find(x => (it.kind === 'char' ? x.zhuyin === it.parts[1] && x.char === it.a : x.char === it.parts[1] && x.zhuyin === it.a));
+      assert.ok(h, it.q);
+      /* 句子裡不能另外出現答案的國字 */
+      assert.ok(!(it.parts[0] + it.parts[2]).includes(h.char), it.q);
+      assert.equal(it.parts.join('').replace(h.zhuyin, h.char), h.sentence);
+    });
     const sim = secs.find(s => s.key === 'similar');
     if (sim) for (const it of sim.items) assert.ok(it.q.includes(it.a) && /（.+　.+）/.test(it.q) && !/＿/.test(it.q), it.q);
     const fix = secs.find(s => s.key === 'fix');
@@ -46,10 +51,23 @@ test('worksheet: rhetoric is multiple choice with the answer among the options',
   const w = load('03'); const sec = WS.build(w, ['rhetoric'], 2)[0];
   for (const it of sec.items) { assert.ok(it.q.startsWith('（　）')); assert.ok(it.opts.includes(it.a)); assert.ok(it.opts.length >= 2); }
 });
-test('worksheet: makeword lists the char and its words', () => {
-  const w = load('03'); const sec = WS.build(w, ['makeword'], 1)[0];
+test('worksheet: makeword asks zhuyin and one word (grades 2-3)', () => {
+  const w = load('01'); const sec = WS.build(w, ['makeword'], 1)[0];
   assert.ok(sec.items.length > 0 && sec.items.length <= 8);
-  for (const it of sec.items) { const c = it.q[0]; assert.ok(it.a.startsWith(c + '：')); assert.ok(it.a.slice(2).split('、').every(x => x.includes(c))); }
+  for (const it of sec.items) {
+    const c = it.head, h = w.hanzi.find(x => x.char === c);
+    assert.equal(it.q, c + '：注音（　　　）　造詞（　　　　）');
+    assert.equal(it.a, c + '：' + h.zhuyin + '；' + h.words[0]);
+  }
+});
+test('worksheet: makeword asks radical and one word (grade 4)', () => {
+  const w = load('01'); const sec = WS.build(w, ['makeword'], 1, null, { makeword: 'radical' })[0];
+  assert.equal(sec.title, '部首與造詞');
+  for (const it of sec.items) {
+    const h = w.hanzi.find(x => x.char === it.head);
+    assert.equal(it.q, it.head + '：部首（　　）　造詞（　　　　）');
+    assert.equal(it.a, it.head + '：' + h.radical + '；' + h.words[0]);
+  }
 });
 test('worksheet: reading only with an unlocked lesson; options shuffled, answer kept', () => {
   const w = load('03');

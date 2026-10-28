@@ -46,7 +46,7 @@ function start(port, opts = {}) {
       ['L06'].concat(opts.openLessons || []).forEach(id => { src = src.replace(new RegExp("(id: '" + id + "'[^}]*open: )false"), '$1true'); });
       return res.end(src);
     }
-    if (file === '/config.js') { res.setHeader('Content-Type', TYPES['.js']); return res.end(`window.H3A_CONFIG = { backendUrl: '${opts.backend === false ? '' : `http://localhost:${port}/fake-backend`}' };`); }
+    if (file === '/config.js') { res.setHeader('Content-Type', TYPES['.js']); return res.end(`window.H3A_CONFIG = { backendUrl: '${opts.backend === false ? '' : `http://localhost:${port}/fake-backend`}', worksheetMakeword: 'radical' };`); }
     const full = path.join(ROOT, decodeURIComponent(file));
     if (!full.startsWith(ROOT) || !fs.existsSync(full) || fs.statSync(full).isDirectory()) { res.statusCode = 404; return res.end('not found'); }
     res.setHeader('Content-Type', TYPES[path.extname(full)] || 'application/octet-stream');

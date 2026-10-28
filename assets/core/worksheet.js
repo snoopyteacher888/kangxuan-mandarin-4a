@@ -6,7 +6,7 @@
   else { root.H3A = root.H3A || {}; root.H3A.worksheet = m; }
 })(this, function (quizgen) {
   var SECTIONS = [
-    { key: 'zhuyin', title: '看注音寫國字', need: 'hanzi' },
+    { key: 'zhuyin', title: '國字注音', need: 'hanzi' },
     { key: 'makeword', title: '造詞', need: 'hanzi' },
     { key: 'vocab', title: '語詞填空', need: 'vocab' },
     { key: 'similar', title: '形近字選選看', need: 'similar' },
@@ -39,19 +39,26 @@
   function take(list, n, r) { return quizgen.shuffle(list, r).slice(0, n); }
 
   var MAKE = {
+    /* 國字注音（橫式、句子）：前一半看注音寫國字，後一半看國字寫注音，答案寫在（　）裡（老師要求）。
+       parts：[前面的字, 注音或國字, 後面的字]；kind：'char' 寫國字、'zy' 寫注音。生字在句子裡出現兩次的不出，免得露出答案 */
     zhuyin: function (w, r) {
-      return { title: '看注音寫國字', say: '看注音，在空格裡寫出國字。',
-        items: take(w.hanzi, MAX.zhuyin, r).map(function (h) {
-          /* boxes：一格一個字，要寫的那一格是空的、旁邊印注音（直書格子） */
-          var boxes = h.cloze.split('').map(function (c) { return c === '＿' ? { zhuyin: h.zhuyin } : { char: c }; });
-          return { q: h.cloze.replace('＿', '（' + h.zhuyin + '）'), a: h.cloze.replace('＿', h.char), boxes: boxes };
-        }), layout: 'boxes' };
+      var list = take(w.hanzi.filter(function (h) { return h.sentence && h.sentence.split(h.char).length === 2; }), MAX.zhuyin, r);
+      var half = Math.ceil(list.length / 2);
+      return { title: '國字注音', say: '看注音寫國字，看國字寫注音，寫在（　）裡。',
+        items: list.map(function (h, i) {
+          var at = h.sentence.indexOf(h.char), before = h.sentence.slice(0, at), after = h.sentence.slice(at + 1);
+          return i < half ? { kind: 'char', parts: [before, h.zhuyin, after], q: before + h.zhuyin + '（　　）' + after, a: h.char }
+            : { kind: 'zy', parts: [before, h.char, after], q: before + h.char + '（　　　）' + after, a: h.zhuyin };
+        }) };
     },
-    makeword: function (w, r) {
-      return { title: '造詞', say: '用每個生字造出兩個語詞。',
-        items: take(w.hanzi.filter(function (h) { return h.words && h.words.length; }), MAX.makeword, r).map(function (h) {
-          return { q: h.char + '：（　　　）（　　　）', a: h.char + '：' + h.words.join('、') };
-        }), layout: 'two' };
+    /* 造詞：每個生字造一個詞；二、三年級加寫注音，四年級加寫部首（opts.makeword === 'radical'） */
+    makeword: function (w, r, lesson, opts) {
+      var rad = opts && opts.makeword === 'radical';
+      return { title: rad ? '部首與造詞' : '注音與造詞', say: rad ? '寫出每個生字的部首，再造一個語詞。' : '寫出每個生字的注音，再造一個語詞。',
+        items: take(w.hanzi.filter(function (h) { return h.words && h.words.length && (!rad || h.radical); }), MAX.makeword, r).map(function (h) {
+          return { head: h.char, q: h.char + '：' + (rad ? '部首（　　）' : '注音（　　　）') + '　造詞（　　　　）',
+            a: h.char + '：' + (rad ? h.radical : h.zhuyin) + '；' + h.words[0] };
+        }), layout: 'wide' };
     },
     vocab: function (w, r) {
       var list = take(w.vocab.filter(function (v) { return v.example && v.example.indexOf('＿') >= 0; }), MAX.vocab, r);
@@ -104,10 +111,11 @@
   };
 
   /* keys：要放的區塊；seed：同一個數字會得到同一份題目；lesson：解開的課文（沒有就不出閱讀理解） */
-  function build(words, keys, seed, lesson) {
+  /* opts.makeword：'radical' 造詞改寫部首（四年級），預設寫注音 */
+  function build(words, keys, seed, lesson, opts) {
     var r = quizgen.rng(seed || 1);
     return available(words, lesson).filter(function (s) { return keys.indexOf(s.key) >= 0; })
-      .map(function (s) { var sec = MAKE[s.key](words, r, lesson); sec.key = s.key; return sec; })
+      .map(function (s) { var sec = MAKE[s.key](words, r, lesson, opts); sec.key = s.key; return sec; })
       .filter(function (sec) { return sec.items.length > 0; });
   }
   return { SECTIONS: SECTIONS, available: available, build: build };

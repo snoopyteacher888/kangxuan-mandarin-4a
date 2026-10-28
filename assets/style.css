@@ -1047,20 +1047,10 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-items { margin: 0; padding-left: 2.8em; }
 .ws-items li { break-inside: avoid; }
 /* 直書格子 */
-.ws-cols { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: row-reverse; flex-wrap: wrap; gap: 12px 7px; line-height: 1; }
-.ws-col { display: flex; flex-direction: column; align-items: center; break-inside: avoid; }
-.ws-no { font-size: .8em; margin-bottom: 4px; }
-.ws-box { box-sizing: border-box; width: 2.9em; height: 2.7em; border: 1.5px solid #666; margin-top: -1.5px; display: flex; align-items: center; justify-content: center; }
-.ws-zk { font-family: 'Bpmf Zihi Kai Std', "LXGW WenKai TC", serif; font-size: 1.7em; }
-.ws-paper .ws-box .ws-zk { font-family: 'Bpmf Zihi Kai Std', "LXGW WenKai TC", serif !important; }
-.ws-blank { justify-content: stretch; }
-.ws-cell { flex: 1; align-self: stretch; }
-.ws-zy { width: 1.35em; box-sizing: border-box; padding-right: .3em; align-self: stretch; border-left: 1px dashed #aaa; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .6em; line-height: 1.05; font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif !important; }
-.ws-zrow { display: flex; align-items: flex-end; }
-.ws-zs { display: flex; flex-direction: column; align-items: center; }
-.ws-tone { width: 0; overflow: visible; transform: translateY(-.25em); }
-.ws-light { line-height: .6; }
 .ws-items li.ws-line { padding-bottom: 0.9em; }
+.ws-mark { text-decoration: underline; text-underline-offset: .2em; margin: 0 .15em; }
+.ws-mzy { font-size: .85em; font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif !important; }
+.ws-paper .ws-bare { font-family: var(--font) !important; }
 .ws-items.ws-two { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1em; }
 .ws-items.ws-two li { white-space: nowrap; }
 .ws-opts { display: flex; flex-wrap: wrap; gap: 0 1.6em; padding-left: 2.2em; }
@@ -1069,9 +1059,10 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-body .ws-opts { padding-left: 1em; }
 .ws-unlock input { font: inherit; padding: 4px 8px; width: 10em; }
 .ws-items.ws-key { columns: 2; }
-.ws-paper.ws-plain, .ws-paper.ws-plain *:not(.ws-zk) { font-family: var(--font) !important; }
+.ws-paper.ws-plain, .ws-paper.ws-plain * { font-family: var(--font) !important; }
 .ws-paper.ws-land .ws-sheet { max-width: 297mm; }
 .ws-paper.ws-land .ws-items.ws-two { grid-template-columns: 1fr 1fr 1fr; }
+.ws-paper.ws-land .ws-items.ws-wide { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1em; }
 @media (max-width: 600px) { .ws-sheet { padding: 16px; font-size: 17px; } }
 @media print {
   html, body { background: #fff !important; }

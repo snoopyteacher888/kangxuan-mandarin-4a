@@ -8,20 +8,12 @@
     return (root.H3A_LESSONS || []).filter(function (l) { return root.H3A_WORDS && root.H3A_WORDS[l.id]; });
   }
 
-  var TONE = /[ˊˇˋ˙]/;
-  /* 直書格子：一個語詞一直行，從右往左排；要寫的格子空白，右邊印注音 */
-  function boxes(items) {
-    return h('ol', { class: 'ws-cols' }, items.map(function (it, i) {
-      return h('li', { class: 'ws-col' }, h('span', { class: 'ws-no' }, String(i + 1)), it.boxes.map(function (b) {
-        if (b.char) return h('span', { class: 'ws-box' }, h('span', { class: 'ws-zk' }, H3A.zhuyin ? H3A.zhuyin.mark(b.char) : b.char));
-        var sym = b.zhuyin.split('').filter(function (c) { return !TONE.test(c); });
-        var tone = (b.zhuyin.match(/[ˊˇˋ]/) || [''])[0], light = b.zhuyin.indexOf('˙') >= 0;
-        return h('span', { class: 'ws-box ws-blank' }, h('span', { class: 'ws-cell' }),
-          h('span', { class: 'ws-zy' }, light ? h('span', { class: 'ws-light' }, '˙') : null,
-            h('span', { class: 'ws-zrow' }, h('span', { class: 'ws-zs' }, sym.map(function (c) { return h('span', {}, c); })),
-              tone ? h('span', { class: 'ws-tone' }, tone) : null)));
-      }));
-    }));
+  /* 不印注音的字（印注音時，要寫注音的國字和造詞的生字不能露出答案） */
+  function bare(c) { return h('span', { class: 'ws-bare' }, c); }
+  /* 國字注音：一句一行，注音或國字加底線，後面接（　）（老師要求：改回橫式、用句子） */
+  function sentenceItem(it) {
+    var mark = it.kind === 'char' ? h('span', { class: 'ws-mark ws-mzy' }, it.parts[1]) : h('span', { class: 'ws-mark' }, bare(it.parts[1]));
+    return h('li', {}, it.parts[0], mark, it.kind === 'char' ? '（　　）' : '（　　　）', it.parts[2]);
   }
 
   function paper(meta, sections, opts) {
@@ -33,7 +25,9 @@
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
         h('h2', {}, CN[i] + '、' + sec.title), h('p', { class: 'ws-say' }, sec.say));
       if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.map(function (b) { return h('span', {}, b); })));
-      box.appendChild(sec.layout === 'boxes' ? boxes(sec.items) : h('ol', { class: 'ws-items' + (sec.layout === 'two' ? ' ws-two' : '') }, sec.items.map(function (it) {
+      box.appendChild(h('ol', { class: 'ws-items' + (sec.layout ? ' ws-' + sec.layout : '') }, sec.items.map(function (it) {
+        if (it.parts) return sentenceItem(it);
+        if (it.head) return h('li', {}, bare(it.head), it.q.slice(it.head.length));
         /* 前面有（　）的題目：換行時對齊題目的第一個字（老師要求） */
         var m = /^(（[　]+）)(.*)$/.exec(it.q);
         var opts = it.opts ? h('div', { class: 'ws-opts' }, it.opts.map(function (o) { return h('span', {}, o); })) : null;
@@ -114,7 +108,7 @@
         h('button', { type: 'button', class: 'btn ws-shuffle', onclick: function () { state.seed += 1; draw(); } }, '🔀 換一份題目')));
       pageStyle(state.land);
       var meta = list.filter(function (l) { return l.id === state.id; })[0];
-      var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson);
+      var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson, { makeword: (root.H3A_CONFIG || {}).worksheetMakeword });
       if (!sections.length) { preview.appendChild(h('p', { class: 'notice' }, '請至少選一種題型。')); return; }
       preview.appendChild(paper(meta, sections, state));
     }

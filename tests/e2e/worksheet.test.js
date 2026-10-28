@@ -37,9 +37,12 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   assert.equal(await p.locator('.ws-sheet').count(), 0);
   await p.check('.ws-all');
   assert.equal(await p.locator('.ws-sheet:not(.ws-answers) .ws-sec').count(), secs);
-  // 看注音寫國字：直書格子，10 題，每題一個空格
-  assert.equal(await p.locator('.ws-col').count(), 10);
-  assert.equal(await p.locator('.ws-box.ws-blank').count(), 10);
+  // 國字注音：橫式句子，10 題，前 5 題看注音寫國字、後 5 題看國字寫注音
+  assert.equal(await p.locator('.ws-zhuyin li').count(), 10);
+  assert.equal(await p.locator('.ws-zhuyin .ws-mzy').count(), 5);
+  assert.equal(await p.locator('.ws-zhuyin .ws-mark .ws-bare').count(), 5);
+  // 造詞：只造一個詞，加寫部首
+  assert.match(await p.locator('.ws-makeword li').first().innerText(), /部首（　+）　造詞（　+）/);
   await p.uncheck('input[data-key="fix"]');
   // 換課
   await p.selectOption('.ws-lesson', 'L12');
