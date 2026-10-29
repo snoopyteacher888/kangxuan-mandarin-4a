@@ -179,13 +179,18 @@ test('record posted with student from link', async () => {
 test('unknown student id shows picker', async () => {
   const p = await page(); await p.goto(BASE + '#/L06?s=ghost');
   await p.waitForSelector('.picker-card');
-  assert.deepEqual(await p.$$eval('.picker-card', x => x.map(c => c.dataset.student)), ['bear', 'cat']);
+  assert.deepEqual(await p.$$eval('.picker-card', x => x.map(c => c.dataset.student)), ['class', 'bear', 'cat']);
 });
 
 test('class mode records class', async () => {
   const before = submits().length;
   const p = await page(() => localStorage.setItem('k4a.settings', JSON.stringify({ mode: 'class', zhuyin: false })));
-  await unlock(p, '#/L06/read?s=bear');
+  /* 全班模式：每次打開網頁都要先輸入老師密碼 */
+  await p.goto(BASE + '#/L06/read');
+  await p.click('.picker-card[data-student="class"]');
+  await p.fill('.class-pass input[type=password]', 'teacher-pass'); await p.click('.class-pass button[type=submit]');
+  await p.waitForSelector('.class-pass', { state: 'detached' });
+  await p.fill('input[type=password]', 'test-pass'); await p.click('button[type=submit]');
   await p.click('text=我讀完了'); await p.waitForSelector('.result');
   for (let i = 0; i < 20 && submits().length === before; i++) await p.waitForTimeout(50);
   const r = submits().at(-1);

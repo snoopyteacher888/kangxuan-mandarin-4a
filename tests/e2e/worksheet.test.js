@@ -16,6 +16,8 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   const p = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
   const errors = []; p.on('pageerror', e => errors.push(e.message));
   await p.goto(BASE);
+  /* 一進網站先選身分 */
+  await p.click('.picker-card[data-student="bear"]');
   await p.click('.ws-open');
   await p.waitForSelector('.ws-sheet');
   assert.match(await p.locator('.ws-title').first().innerText(), /第 1 課/);

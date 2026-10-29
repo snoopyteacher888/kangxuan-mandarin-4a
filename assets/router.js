@@ -6,6 +6,17 @@
   /* 不需要教室密碼的頁面（課次選單、字詞練習、錯題複習） */
   var NO_KEY = [null, 'hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom', 'feedback', 'review'];
   var renderToken = 0;
+  /* 選擇身分（老師要求）：每次進網站先選全班或動物；全班要老師密碼，只在這次打開網頁有效，離開再進來要重新輸入 */
+  var entered = false, classOk = false;
+  function pickClass(id, after) {
+    if (!id) { after(); return; } /* 還沒有名冊：picker 已經改成全班 */
+    if (id === 'class') { classOk = true; H3A.session.saveSettings({ mode: 'class', student: null }); }
+    else H3A.session.saveSettings({ mode: 'student', student: id });
+    after();
+  }
+  function whoPage(after) {
+    H3A.pages.picker(shell({ back: '#/', title: '你是誰？' }), { go: go, allowClass: true, onPick: function (id) { pickClass(id, after); } });
+  }
 
   function lessonMeta(id) { return (root.H3A_LESSONS || []).filter(function (l) { return l.id === id; })[0]; }
   function go(hash) { if (root.location.hash === hash) render(); else root.location.hash = hash; }
@@ -34,18 +45,13 @@
     var parsed = H3A.links.parseHash(root.location.hash);
     var p = parsed.path;
     var settings = H3A.session.settings();
+    var first = !entered; entered = true;
+    var hasRoster = H3A.session.roster().length > 0;
+    if (p[0] !== 'teacher' && p[0] !== 'settings' && p[0] !== 'who' && hasRoster &&
+        ((first && !p.length) || (settings.mode === 'class' && !classOk))) { whoPage(render); return; }
     if (!p.length) { /* 首頁上方只放橘色的「康軒國語四上」，放中間（老師要求） */
       H3A.pages.home(shell({ title: '康軒國語四上', brand: true }), { go: go, settings: settings }); return; }
-    if (p[0] === 'who') { /* 選擇身分：全班（要老師密碼）或自己的動物 */
-      H3A.pages.picker(shell({ back: '#/', title: '你是誰？' }), {
-        go: go, allowClass: true, onPick: function (id) {
-          if (id === 'class') H3A.session.saveSettings({ mode: 'class', student: null });
-          else H3A.session.saveSettings({ mode: 'student', student: id });
-          go('#/');
-        }
-      });
-      return;
-    }
+    if (p[0] === 'who') { whoPage(function () { go('#/'); }); return; }
     if (p[0] === 'worksheet') {
       H3A.pages.worksheet(shell({ back: '#/', title: '學習單印製' }), { go: go, settings: settings, params: { l: p[1] } }); return; }
     if (p[0] === 'settings' || p[0] === 'teacher') {
@@ -65,9 +71,7 @@
     var titleText = activity ? H3A.pages.activityTitle(activity) : '第 ' + parseInt(meta.id.slice(1), 10) + ' 課 ' + meta.title;
     var back = activity ? '#/' + meta.id : '#/';
     if (who.needPicker) {
-      H3A.pages.picker(shell({ back: '#/', title: '你是誰？' }), {
-        go: go, onPick: function (id) { H3A.session.saveSettings({ student: id }); render(); }
-      });
+      whoPage(render);
       return;
     }
     var main = shell({ back: back, title: titleText, titleSay: true, student: H3A.session.studentInfo(who.student) });
