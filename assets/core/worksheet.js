@@ -54,9 +54,9 @@
     /* 造詞：每個生字造一個詞；二、三年級加寫注音，四年級加寫部首（opts.makeword === 'radical'） */
     makeword: function (w, r, lesson, opts) {
       var rad = opts && opts.makeword === 'radical';
-      return { title: rad ? '部首與造詞' : '注音與造詞', say: rad ? '寫出每個生字的部首，再造一個語詞。' : '寫出每個生字的注音，再造一個語詞。',
+      return { title: rad ? '部首與造詞' : '注音與造詞', say: rad ? '寫出部首並造詞。' : '寫出注音並造詞。',
         items: take(w.hanzi.filter(function (h) { return h.words && h.words.length && (!rad || h.radical); }), MAX.makeword, r).map(function (h) {
-          return { head: h.char, q: h.char + '：' + (rad ? '部首（　　）' : '注音（　　　）') + '　造詞（　　　　）',
+          return { head: h.char, q: h.char + '：' + (rad ? '（　　）' : '（　　　）') + '　（　　　　）',
             a: h.char + '：' + (rad ? h.radical : h.zhuyin) + '；' + h.words[0] };
         }), layout: 'wide' };
     },

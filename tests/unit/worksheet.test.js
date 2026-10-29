@@ -56,7 +56,7 @@ test('worksheet: makeword asks zhuyin and one word (grades 2-3)', () => {
   assert.ok(sec.items.length > 0 && sec.items.length <= 8);
   for (const it of sec.items) {
     const c = it.head, h = w.hanzi.find(x => x.char === c);
-    assert.equal(it.q, c + '：注音（　　　）　造詞（　　　　）');
+    assert.equal(it.q, c + '：（　　　）　（　　　　）');
     assert.equal(it.a, c + '：' + h.zhuyin + '；' + h.words[0]);
   }
 });
@@ -65,7 +65,7 @@ test('worksheet: makeword asks radical and one word (grade 4)', () => {
   assert.equal(sec.title, '部首與造詞');
   for (const it of sec.items) {
     const h = w.hanzi.find(x => x.char === it.head);
-    assert.equal(it.q, it.head + '：部首（　　）　造詞（　　　　）');
+    assert.equal(it.q, it.head + '：（　　）　（　　　　）');
     assert.equal(it.a, it.head + '：' + h.radical + '；' + h.words[0]);
   }
 });

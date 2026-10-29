@@ -42,7 +42,7 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   assert.equal(await p.locator('.ws-zhuyin .ws-mzy').count(), 5);
   assert.equal(await p.locator('.ws-zhuyin .ws-mark .ws-bare').count(), 5);
   // 造詞：只造一個詞，加寫部首
-  assert.match(await p.locator('.ws-makeword li').first().innerText(), /部首（　+）　造詞（　+）/);
+  assert.match(await p.locator('.ws-makeword li').first().innerText(), /^.：（　+）　（　+）$/);
   await p.uncheck('input[data-key="fix"]');
   // 換課
   await p.selectOption('.ws-lesson', 'L12');
