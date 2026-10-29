@@ -24,7 +24,8 @@
     sections.forEach(function (sec, i) {
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
         h('h2', {}, CN[i] + '、' + sec.title), h('p', { class: 'ws-say' }, sec.say));
-      if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.map(function (b) { return h('span', {}, b); })));
+      /* 語詞盒、成語盒：用頓號隔開（老師要求） */
+      if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.join('、')));
       box.appendChild(h('ol', { class: 'ws-items' + (sec.layout ? ' ws-' + sec.layout : '') }, sec.items.map(function (it) {
         if (it.parts) return sentenceItem(it);
         if (it.head) return h('li', {}, bare(it.head), it.q.slice(it.head.length));

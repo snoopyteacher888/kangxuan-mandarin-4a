@@ -31,7 +31,7 @@ for (const n of ids) {
       assert.equal(it.parts.join('').replace(h.zhuyin, h.char), h.sentence);
     });
     const sim = secs.find(s => s.key === 'similar');
-    if (sim) for (const it of sim.items) assert.ok(it.q.includes(it.a) && /（.+　.+）/.test(it.q) && !/＿/.test(it.q), it.q);
+    if (sim) for (const it of sim.items) assert.ok(it.q.includes(it.a) && /（.+／.+）/.test(it.q) && !/＿/.test(it.q), it.q);
     const fix = secs.find(s => s.key === 'fix');
     if (fix) for (const it of fix.items) { const [wr, ch] = it.a.split(' → '); assert.ok(it.q.startsWith('（　　）') && it.q.includes(wr)); assert.notEqual(wr, ch); }
     const voc = secs.find(s => s.key === 'vocab');

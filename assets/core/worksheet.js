@@ -69,7 +69,7 @@
     similar: function (w, r) {
       return { title: '形近字選選看', say: '圈出括號裡正確的字。',
         items: take(w.similar, MAX.similar, r).map(function (s) {
-          return { q: s.sentence.replace(/＿+/, '（' + quizgen.shuffle(s.options, r).join('　') + '）'), a: s.answer };
+          return { q: s.sentence.replace(/＿+/, '（' + quizgen.shuffle(s.options, r).join('／') + '）'), a: s.answer };
         }) };
     },
     fix: function (w, r) {
