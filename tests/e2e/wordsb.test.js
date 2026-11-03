@@ -395,3 +395,19 @@ test('who page: pick an animal, or whole class with teacher password', async () 
   await p.waitForSelector('.who-open >> text=全班（換人）');
   assert.deepEqual(p.errors, []);
 });
+
+test('teacher can grade a pending sentence that only reached the records (old backend)', async () => {
+  const t = await page(); await t.goto(BASE + '#/teacher');
+  await t.evaluate(url => fetch(url, { method: 'POST', body: JSON.stringify({ action: 'submit', record: {
+    id: 'oldrec1', ts: new Date().toISOString(), student: 'cat', place: 'home', lesson: 'L06', activity: 'pattern',
+    items: [{ q: 'pt-old-1', result: 'pending', said: '等蛋糕放涼了才能吃' }], firstTryRate: 0, stars: 1, durationSec: 30 } }) }), BASE + 'fake-backend');
+  await t.fill('input[type=password]', 'teacher-pass'); await t.click('button[type=submit]');
+  const row = '.speech-row[data-id="rec-oldrec1-pt-old-1"]';
+  await t.waitForSelector(row);
+  assert.match(await t.locator(row).innerText(), /等蛋糕放涼了才能吃/);
+  await t.click(`${row} [data-grade="ok"]`);
+  await t.waitForSelector(`.graded ${row}`, { state: 'attached' });
+  assert.equal(speechFor('pt-old-1').at(-1).status, 'ok');
+  assert.equal(speechFor('pt-old-1').length, 1);
+  assert.deepEqual(t.errors, []);
+});

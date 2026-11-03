@@ -62,6 +62,7 @@
     var gradeBox = h('div', { class: 'panel grade-panel' });
     var listBox = h('div', { class: 'panel' }), missBox = h('div', { class: 'panel' }), rosterBox = h('div', { class: 'panel' });
     var roster = [];
+    var lastRecords = [];
     main.appendChild(h('div', { class: 'form-row' }, fStu, fAct, fRange,
       h('button', { type: 'button', class: 'btn-secondary', onclick: function () { setToken(null); login(main, ctx); } }, '登出')));
     main.appendChild(gradeBox); main.appendChild(missBox); main.appendChild(listBox); main.appendChild(rosterBox);
@@ -78,14 +79,18 @@
           gradeBox.appendChild(h('p', { class: 'error' }, '後台需要更新：請照「老師使用說明」貼上新的 Code.gs，再用「管理部署作業 → 編輯 → 新版本」部署。更新後，學生說的句子就會送進來。'));
           return;
         }
-        showSpeech(res.speech || []);
+        showSpeech(mergePending(res.speech || []));
       }, function () { H3A.ui.clear(gradeBox); gradeBox.appendChild(h('p', { class: 'error' }, '待批改：無法連線，請檢查網路')); });
     }
     function speechRow(r) {
       var note = h('input', { type: 'text', class: 'big-input note-input', maxlength: '100', value: r.teacherNote || '', placeholder: '老師的話（可以不填）', 'aria-label': '老師的話' });
       var msg = h('span', { class: 'saved' });
       function grade(g) {
-        H3A.api.call('grade', { token: token(), id: r.id, grade: g, note: note.value.trim() }).then(function (res) {
+        var send = r.fromRecord ? H3A.api.call('speech', { speech: r.speech }) : Promise.resolve({ ok: true });
+        send.then(function (s) {
+          if (!s || !s.ok) throw new Error('speech');
+          return H3A.api.call('grade', { token: token(), id: r.id, grade: g, note: note.value.trim() });
+        }).then(function (res) {
           if (res.error === 'AUTH') { setToken(null); login(main, ctx); return; }
           if (res.error) { msg.textContent = '儲存失敗'; return; }
           loadSpeech();
@@ -99,6 +104,33 @@
         h('div', { class: 'form-row' }, note,
           h('button', { type: 'button', class: 'btn-primary', 'data-grade': 'ok', onclick: function () { grade('ok'); } }, '✅ 合理'),
           h('button', { type: 'button', class: 'btn-secondary', 'data-grade': 'redo', onclick: function () { grade('redo'); } }, '🔁 再試一次'), msg));
+    }
+    /* 作答紀錄裡「等老師批改」的句子，如果還沒送進待批改（例如當時後台是舊版、句子留在學生的裝置上），
+       也放進待批改；按下批改時才送到後台（id 固定，不會重複）。同一句已經批改過的，後來才送到的那一筆自動套用一樣的批改 */
+    function key(student, qid, said) { return student + '|' + qid + '|' + said; }
+    function mergePending(speech) {
+      var graded = {}, have = {};
+      speech.forEach(function (x) {
+        have[key(x.student, x.qid, x.said)] = true;
+        if (x.status === 'ok' || x.status === 'redo') graded[key(x.student, x.qid, x.said)] = x;
+      });
+      var out = speech.filter(function (x) {
+        var g = x.status === 'pending' && graded[key(x.student, x.qid, x.said)];
+        if (g) H3A.api.call('grade', { token: token(), id: x.id, grade: g.status, note: g.teacherNote || '' });
+        return !g;
+      });
+      lastRecords.forEach(function (rec) {
+        if (fStu.value && rec.student !== fStu.value) return;
+        (rec.items || []).forEach(function (it) {
+          if (it.result !== 'pending' || !it.said || have[key(rec.student, it.q, it.said)]) return;
+          have[key(rec.student, it.q, it.said)] = true;
+          var sp = { id: ('rec-' + rec.id + '-' + it.q).slice(0, 64), ts: rec.ts, student: rec.student, place: rec.place, lesson: rec.lesson,
+            activity: rec.activity, qid: String(it.q).slice(0, 20), prompt: qText(it.q, rec.lesson).slice(0, 200), said: String(it.said).slice(0, 200), status: 'pending' };
+          out.push({ id: sp.id, ts: sp.ts, student: sp.student, activity: sp.activity, lesson: sp.lesson, qid: sp.qid, prompt: sp.prompt, said: sp.said,
+            status: 'pending', teacherNote: '', fromRecord: true, speech: sp });
+        });
+      });
+      return out;
     }
     function showSpeech(list) {
       H3A.ui.clear(gradeBox);
@@ -155,6 +187,7 @@
       showRoster();
     }
     function showList(records) {
+      lastRecords = records;
       H3A.ui.clear(missBox);
       missBox.appendChild(h('h2', {}, '最常錯的題目'));
       var top = H3A.dashboard.topMissed(records, 5);
@@ -168,9 +201,11 @@
       records.forEach(function (r) {
         var detail = h('tr', { class: 'rec-detail', hidden: true }, h('td', { colspan: '6' },
           r.items.length ? h('ul', {}, r.items.map(function (it) {
-            return h('li', {}, qText(it.q, r.lesson) + '：' + (RESULT[it.result] || it.result) + (it.wrong && it.wrong.length ? '（選錯：' + it.wrong.join('、') + '）' : ''));
+            return h('li', {}, qText(it.q, r.lesson) + '：' + (RESULT[it.result] || it.result) + (it.wrong && it.wrong.length ? '（選錯：' + it.wrong.join('、') + '）' : ''),
+              /* 說說看：顯示學生說的句子（老師要求） */
+              it.said ? h('p', { class: 'speech-said' }, '學生說：', h('strong', {}, it.said), H3A.ui.speaker(it.said, null)) : null);
           })) : '讀完課文', h('p', { class: 'small' }, '花費 ' + Math.floor(r.durationSec / 60) + ' 分 ' + (r.durationSec % 60) + ' 秒')));
-        var res = r.score !== null && r.score !== undefined ? r.score + ' 分' : r.activity === 'read' ? '完成' : Math.round(r.firstTryRate * 100) + '%';
+        var res = r.score !== null && r.score !== undefined ? r.score + ' 分' : r.activity === 'read' ? '完成' : (r.items.length && r.items.every(function (it) { return it.result === 'pending'; }) ? '等批改' : Math.round(r.firstTryRate * 100) + '%');
         tb.appendChild(h('tr', {},
           h('td', {}, who(r.student)), h('td', {}, H3A.pages.activityTitle(r.activity)), h('td', {}, fmtDate(r.ts)),
           h('td', {}, PLACE[r.place] || r.place), h('td', {}, res + ' ' + '⭐'.repeat(r.stars || 0)),
