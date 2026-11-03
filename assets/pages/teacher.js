@@ -83,18 +83,25 @@
       }, function () { H3A.ui.clear(gradeBox); gradeBox.appendChild(h('p', { class: 'error' }, '待批改：無法連線，請檢查網路')); });
     }
     function speechRow(r) {
-      var note = h('input', { type: 'text', class: 'big-input note-input', maxlength: '100', value: r.teacherNote || '', placeholder: '老師的話（可以不填）', 'aria-label': '老師的話' });
-      var msg = h('span', { class: 'saved' });
+      var note = h('input', { type: 'text', class: 'big-input note-input', maxlength: '100', value: r.draft !== undefined ? r.draft : r.teacherNote || '', placeholder: '老師的話（可以不填）', 'aria-label': '老師的話' });
+      note.addEventListener('input', function () { r.draft = note.value; });
+      var msg = h('span', { class: 'saved' }, r.saving ? '儲存中…' : r.err || (r.savedOk ? '已儲存 ✔' : ''));
+      /* 按下就先移到「已批改」，後台在背景慢慢存（Apps Script 一次要 1～3 秒）；存不進去再移回來（老師要求：反應快一點） */
       function grade(g) {
+        var prev = { status: r.status, teacherNote: r.teacherNote };
+        r.status = g; r.teacherNote = note.value.trim(); r.draft = undefined; r.saving = true; r.err = ''; r.savedOk = false;
+        showSpeech(shownList);
         var send = r.fromRecord ? H3A.api.call('speech', { speech: r.speech }) : Promise.resolve({ ok: true });
         send.then(function (s) {
           if (!s || !s.ok) throw new Error('speech');
-          return H3A.api.call('grade', { token: token(), id: r.id, grade: g, note: note.value.trim() });
+          r.fromRecord = false;
+          return H3A.api.call('grade', { token: token(), id: r.id, grade: g, note: r.teacherNote });
         }).then(function (res) {
           if (res.error === 'AUTH') { setToken(null); login(main, ctx); return; }
-          if (res.error) { msg.textContent = '儲存失敗'; return; }
-          loadSpeech();
-        }, function () { msg.textContent = '無法連線'; });
+          r.saving = false;
+          if (res.error) fail('儲存失敗，請再按一次'); else { r.savedOk = true; showSpeech(shownList); }
+        }, function () { r.saving = false; fail('無法連線，請再按一次'); });
+        function fail(text) { r.status = prev.status; r.teacherNote = prev.teacherNote; r.err = text; showSpeech(shownList); }
       }
       var status = r.status === 'ok' ? '✅ 合理' : r.status === 'redo' ? '🔁 再試一次' : '';
       return h('div', { class: 'speech-row', 'data-id': r.id },
@@ -132,7 +139,9 @@
       });
       return out;
     }
+    var shownList = [];
     function showSpeech(list) {
+      shownList = list;
       H3A.ui.clear(gradeBox);
       var pending = list.filter(function (r) { return r.status === 'pending'; });
       var done = list.filter(function (r) { return r.status === 'ok' || r.status === 'redo'; });

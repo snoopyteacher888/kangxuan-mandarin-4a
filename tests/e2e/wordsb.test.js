@@ -242,6 +242,7 @@ test('teacher grades and student sees feedback', async () => {
   await t.fill(`${row} .note-input`, '說得很完整，很棒！');
   await t.click(`${row} [data-grade="ok"]`);
   await t.waitForSelector(`.graded ${row}`, { state: 'attached' });
+  await t.waitForSelector(`${row} .saved:text("已儲存")`, { state: 'attached' });
   assert.equal(speechFor('pt-zy-w1').find(x => x.id === id).status, 'ok');
 
   await s.goto(BASE + '#/L06?s=cat');
@@ -407,6 +408,7 @@ test('teacher can grade a pending sentence that only reached the records (old ba
   assert.match(await t.locator(row).innerText(), /等蛋糕放涼了才能吃/);
   await t.click(`${row} [data-grade="ok"]`);
   await t.waitForSelector(`.graded ${row}`, { state: 'attached' });
+  await t.waitForSelector(`${row} .saved:text("已儲存")`, { state: 'attached' });
   assert.equal(speechFor('pt-old-1').at(-1).status, 'ok');
   assert.equal(speechFor('pt-old-1').length, 1);
   assert.deepEqual(t.errors, []);
