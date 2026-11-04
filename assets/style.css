@@ -236,6 +236,13 @@ button:disabled { cursor: default; }
 @media (orientation: portrait) and (max-width: 700px) {
   .fish-head-box, .fish-tail-box { border-radius: 16px; padding-left: 10px; }
 }
+/* 四根骨頭（二年級、四年級有些課）：上面兩根、下面兩根，下面的不要跑到魚的外面（老師要求：跑版了） */
+.bone-4 { grid-row: 3; grid-column: 3; justify-self: center; align-self: start; min-width: 0; }
+.bone-4::after { bottom: 100%; transform: translateX(-50%) skewX(30deg); transform-origin: bottom; }
+.fish.bones-4 .bone-3 { grid-column: 2; min-width: 0; }
+@media (orientation: portrait) and (max-width: 700px) {
+  .bone-4 { order: 3; align-self: stretch; justify-self: stretch; }
+}
 
 /* 字詞練習：大字選項、題目提示圖、聽聽看 */
 .options .option.big { justify-content: center; min-height: 120px; }

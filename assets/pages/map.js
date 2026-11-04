@@ -23,7 +23,7 @@
     }
     var promptEl = h('div', { class: 'prompt' });
     var feedback = h('div', { class: 'feedback', role: 'status' });
-    var fish = tree ? h('div', { class: 'fish tree' }) : h('div', { class: 'fish' }, h('div', { class: 'fish-spine', 'aria-hidden': 'true' }));
+    var fish = tree ? h('div', { class: 'fish tree' }) : h('div', { class: 'fish bones-' + map.bones.length }, h('div', { class: 'fish-spine', 'aria-hidden': 'true' }));
     var tailBox = h('div', { class: 'fish-tail-box' }, h('span', { class: 'fish-label' }, '結論'), h('span', { class: 'fish-q' }, '？'));
     var headBox = h('div', { class: 'fish-head-box' },
       h('span', { class: 'fish-label' }, '主題'), h('strong', {}, tree ? map.head.text : headLines(map.head.text)), H3A.ui.speaker(map.head.text, map.head.say));
