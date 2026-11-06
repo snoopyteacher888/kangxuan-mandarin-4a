@@ -12,6 +12,8 @@
         return h('div', { class: 'idiom-card' },
           h('div', { class: 'idiom-head' }, h('span', { class: 'idiom-word' }, hl(x.idiom, x.char)), H3A.ui.speaker(x.idiom, null),
             h('span', { class: 'idiom-from' }, '生字「' + x.char + '」')),
+          /* 有動畫的成語：先看動畫，再看意思和例句（老師要求） */
+          H3A.ui.idiomAnim ? H3A.ui.idiomAnim(x) : null,
           H3A.ui.infoLine('意思：', x.meaning, x.meaning),
           H3A.ui.infoLine('💬 ', hl(x.example, x.idiom), x.example, '例句'));
       }));
