@@ -33,7 +33,7 @@
 
     // 任務連結
     var link = section('產生任務連結（傳給家長）');
-    var lStu = h('select', { class: 'big-select', 'aria-label': '學生' }, roster.map(function (r) { return h('option', { value: r.id }, r.emoji + ' ' + r.name); }));
+    var lStu = h('select', { class: 'big-select', 'aria-label': '學生' }, roster.map(function (r) { return h('option', { value: r.id }, r.emoji + ' ' + r.name); }).concat([h('option', { value: 'guest' }, '🙋 訪客')]));
     var lLesson = h('select', { class: 'big-select', 'aria-label': '課次' }, lessons.map(function (l) { return h('option', { value: l.id }, '第 ' + parseInt(l.id.slice(1), 10) + ' 課 ' + l.title); }));
     var lAct = h('select', { class: 'big-select', 'aria-label': '活動' }, ACTS.map(function (a) { return h('option', { value: a }, H3A.pages.activityTitle(a)); }));
     var lAuto = h('input', { type: 'checkbox', id: 'lauto' });

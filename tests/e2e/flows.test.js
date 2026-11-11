@@ -179,7 +179,7 @@ test('record posted with student from link', async () => {
 test('unknown student id shows picker', async () => {
   const p = await page(); await p.goto(BASE + '#/L06?s=ghost');
   await p.waitForSelector('.picker-card');
-  assert.deepEqual(await p.$$eval('.picker-card', x => x.map(c => c.dataset.student)), ['class', 'bear', 'cat']);
+  assert.deepEqual(await p.$$eval('.picker-card', x => x.map(c => c.dataset.student)), ['class', 'bear', 'cat', 'guest']);
 });
 
 test('class mode records class', async () => {

@@ -415,6 +415,16 @@ test('teacher roster masks a full name to the middle character', async () => {
   assert.deepEqual(t.errors, []);
 });
 
+test('who page: guest picks without password and records go to backend as guest', async () => {
+  const p = await page(); await p.goto(BASE + '#/who');
+  await p.click('.picker-card[data-student="guest"]');
+  await p.waitForSelector('.who-open >> text=訪客（換人）');
+  assert.equal(await p.$('input[type=password]'), null);
+  await p.goto(BASE + '#/L06/pattern?retry=pt-zy-w1');
+  await p.waitForSelector('.who >> text=訪客');
+  assert.deepEqual(p.errors, []);
+});
+
 test('who page: pick an animal, or whole class with teacher password', async () => {
   const p = await page(); await p.goto(BASE + '#/who');
   await p.click('.picker-card[data-student="bear"]');

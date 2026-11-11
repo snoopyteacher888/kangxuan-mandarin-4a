@@ -154,6 +154,7 @@
 
     function who(id) {
       if (id === 'class') return '👨‍👩‍👧‍👦 全班';
+      if (id === 'guest') return '🙋 訪客';
       var r = roster.filter(function (x) { return x.id === id; })[0];
       return r ? r.emoji + ' ' + r.name : id;
     }
@@ -191,6 +192,7 @@
       H3A.ui.clear(fStu);
       fStu.appendChild(h('option', { value: '' }, '全部學生'));
       fStu.appendChild(h('option', { value: 'class' }, '👨‍👩‍👧‍👦 全班'));
+      fStu.appendChild(h('option', { value: 'guest' }, '🙋 訪客'));
       roster.forEach(function (r) { fStu.appendChild(h('option', { value: r.id }, r.emoji + ' ' + r.name)); });
       fStu.value = cur;
       showRoster();

@@ -22,6 +22,7 @@
   }
   function studentInfo(id) {
     if (id === 'class') return { id: 'class', emoji: '👨‍👩‍👧‍👦', name: '全班' };
+    if (id === 'guest') return { id: 'guest', emoji: '🙋', name: '訪客' };
     var r = roster().filter(function (x) { return x.id === id; })[0];
     return r || { id: id, emoji: '🙂', name: id };
   }

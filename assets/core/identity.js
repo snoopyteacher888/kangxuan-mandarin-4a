@@ -6,6 +6,7 @@
 })(this, function () {
   function inRoster(roster, id) {
     if (!roster || !roster.length) return true; // 名冊抓不到時，相信連結或裝置的設定
+    if (id === 'guest') return true; // 訪客不在名冊裡，也不用密碼（給來測試、分享說明用）
     return roster.some(function (r) { return r.id === id; });
   }
   function resolveStudent(params, roster, settings) {
