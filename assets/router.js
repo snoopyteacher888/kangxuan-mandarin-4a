@@ -2,9 +2,9 @@
 (function (root) {
   var H3A = root.H3A;
   var h = H3A.ui.h;
-  var ACTIVITIES = ['read', 'map', 'quiz', 'review', 'test', 'hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom', 'feedback'];
+  var ACTIVITIES = ['read', 'map', 'quiz', 'review', 'test', 'hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom', 'feedback', 'redo'];
   /* 不需要教室密碼的頁面（課次選單、字詞練習、錯題複習） */
-  var NO_KEY = [null, 'hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom', 'feedback', 'review'];
+  var NO_KEY = [null, 'hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom', 'feedback', 'redo', 'review'];
   var renderToken = 0;
   /* 選擇身分（老師要求）：每次進網站先選全班或動物；全班要老師密碼，只在這次打開網頁有效，離開再進來要重新輸入 */
   var entered = false, classOk = false;

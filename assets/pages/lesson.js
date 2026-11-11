@@ -37,12 +37,23 @@
     /* 老師批改過說說看的句子，就在最上面出現「老師的批改」 */
     var fbSlot = h('div', { class: 'fb-banner-slot' });
     main.appendChild(fbSlot);
+    /* 老師退回「再試一次」的句子，多一區「句型修改」，點進去直接重新練習 */
+    var redoSlot = h('div', { class: 'redo-slot' });
+    main.appendChild(redoSlot);
     H3A.feedback.unseenCount(ctx).then(function (n) {
       if (!n.total) return;
       var text = n.unseen ? '老師批改了 ' + n.unseen + ' 題' : '老師的批改';
       fbSlot.appendChild(h('div', { class: 'fb-banner' + (n.unseen ? ' new' : '') },
         h('button', { type: 'button', class: 'btn-primary', onclick: function () { ctx.go('#/' + ctx.lessonId + '/feedback'); } }, H3A.ui.teacherFace(), text),
         H3A.ui.speaker(text, null)));
+      if (!n.redo) return;
+      var name = H3A.pages.activityTitle('redo'), desc = '老師退回的句子，看老師說的話，再說一次';
+      redoSlot.appendChild(h('section', { class: 'menu-section redo-section' }, h('h2', { class: 'menu-title' }, '✏️ 老師要你修改'),
+        h('div', { class: 'lesson-grid-cards' }, h('div', { class: 'lc-card', style: '--c:#D9822B' },
+          h('div', { class: 'lc-head' }, h('span', { class: 'lc-icon' }, '✏️'), H3A.ui.sayable(h('h3', { class: 'lc-name' }, name), name + '。' + desc)),
+          h('p', { class: 'lc-desc' }, desc),
+          h('div', { class: 'lc-status' }, h('span', {}, '有 ' + n.redo + ' 句要修改')),
+          h('button', { type: 'button', class: 'lc-go', 'data-activity': 'redo', onclick: function () { ctx.go('#/' + ctx.lessonId + '/redo'); } }, '開始 →')))));
     });
     SECTIONS.forEach(function (sec) {
       var grid = h('div', { class: 'lesson-grid-cards' });

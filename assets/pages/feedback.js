@@ -8,32 +8,67 @@
     var s = seen(student); ids.forEach(function (id) { if (s.indexOf(id) < 0) s.push(id); });
     H3A.store.set(seenKey(student), s.slice(-500));
   }
-  /* 只取這一課的批改；回傳 Promise<list>，連不上就回傳 [] */
+  /* 這位學生全部的批改；同一位學生 30 秒內只問一次後台。連不上就回傳 [] */
+  var cache = {};
+  function loadAll(student) {
+    if (!student) return Promise.resolve([]);
+    var c = cache[student];
+    if (c && Date.now() - c.t < 30000) return c.p;
+    var p = H3A.api.call('feedback', { student: student }).then(function (res) {
+      return (res && res.feedback || []).slice();
+    }, function () { delete cache[student]; return []; });
+    cache[student] = { t: Date.now(), p: p };
+    return p;
+  }
+  /* 只取這一課的批改；回傳 Promise<list> */
   function load(ctx) {
-    if (!ctx.student) return Promise.resolve([]);
-    return H3A.api.call('feedback', { student: ctx.student }).then(function (res) {
-      return (res && res.feedback || []).filter(function (f) { return f.lesson === ctx.lessonId; });
-    }, function () { return []; });
+    return loadAll(ctx.student).then(function (all) { return all.filter(function (f) { return f.lesson === ctx.lessonId; }); });
+  }
+  /* 同一題只留最新的批改（重說後老師再批，就不再顯示舊的「再試一次」） */
+  function latest(list) {
+    list = list.slice().sort(function (a, b) { return String(b.gradedAt).localeCompare(String(a.gradedAt)); });
+    var shown = {};
+    return list.filter(function (f) { if (shown[f.qid]) return false; shown[f.qid] = true; return true; });
+  }
+  function needsRedo(f) { return f.status !== 'ok'; }
+  /* 每一課的批改情形：{ L01: { total, unseen, redo } } */
+  function summary(student) {
+    return loadAll(student).then(function (all) {
+      var s = seen(student), out = {}, byLesson = {};
+      all.forEach(function (f) { (byLesson[f.lesson] = byLesson[f.lesson] || []).push(f); });
+      Object.keys(byLesson).forEach(function (l) {
+        var list = byLesson[l];
+        out[l] = { total: list.length, unseen: list.filter(function (f) { return s.indexOf(f.id) < 0; }).length,
+          redo: latest(list).filter(needsRedo).length };
+      });
+      return out;
+    });
   }
   function unseenCount(ctx) {
     return load(ctx).then(function (list) {
       var s = seen(ctx.student);
-      return { total: list.length, unseen: list.filter(function (f) { return s.indexOf(f.id) < 0; }).length };
+      return { total: list.length, unseen: list.filter(function (f) { return s.indexOf(f.id) < 0; }).length,
+        redo: latest(list).filter(needsRedo).length };
     });
   }
 
-  H3A.pages.feedback = function (main, ctx) {
-    main.appendChild(h('div', { class: 'prompt' }, H3A.ui.teacherFace(), H3A.ui.sayable(h('h2', {}, '老師的批改'), '老師的批改')));
-    var box = h('div', { class: 'feedback-list' }, h('p', {}, '載入中…'));
+  /* onlyRedo：「句型修改」只列出老師要你再試一次的句子 */
+  function render(main, ctx, onlyRedo) {
+    var title = onlyRedo ? '句型修改' : '老師的批改';
+    main.appendChild(h('div', { class: 'prompt' }, H3A.ui.teacherFace(), H3A.ui.sayable(h('h2', {}, title), title)));
+    if (onlyRedo) main.appendChild(h('p', { class: 'notice redo-tip' }, '老師把這些句子退回來了。看看老師說的話，再按「🎤 再說一次」重新練習。'));
+    var box = h('div', { class: 'feedback-list' + (onlyRedo ? ' redo-list' : '') }, h('p', {}, '載入中…'));
     main.appendChild(box);
     load(ctx).then(function (list) {
       H3A.ui.clear(box);
       if (!list.length) { box.appendChild(h('p', { class: 'notice' }, '老師還沒有批改你的句子。')); return; }
       var before = seen(ctx.student);
-      list.sort(function (a, b) { return String(b.gradedAt).localeCompare(String(a.gradedAt)); });
-      /* 同一題只留最新的批改（重說後老師再批，就不再顯示舊的「再試一次」） */
-      var allIds = list.map(function (f) { return f.id; }), shown = {};
-      list = list.filter(function (f) { if (shown[f.qid]) return false; shown[f.qid] = true; return true; });
+      var allIds = list.map(function (f) { return f.id; });
+      list = latest(list);
+      if (onlyRedo) {
+        list = list.filter(needsRedo);
+        if (!list.length) { box.appendChild(h('p', { class: 'notice' }, '要修改的句子都改好了，太棒了！🎉')); return; }
+      }
       var firstNew = null;
       list.forEach(function (f) {
         var ok = f.status === 'ok';
@@ -51,6 +86,8 @@
       markSeen(ctx.student, allIds);
       if (firstNew) H3A.tts.speak('老師說：' + firstNew.teacherNote);
     });
-  };
-  H3A.feedback = { unseenCount: unseenCount };
+  }
+  H3A.pages.feedback = function (main, ctx) { render(main, ctx, false); };
+  H3A.pages.redo = function (main, ctx) { render(main, ctx, true); };
+  H3A.feedback = { unseenCount: unseenCount, summary: summary };
 })(this);

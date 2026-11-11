@@ -1100,3 +1100,9 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ia-end { display: flex; flex-direction: column; align-items: center; gap: 2px; background: #FFF6EA; border-radius: 12px; padding: 6px 14px; text-align: center; }
 .ia-end[hidden] { display: none; }
 .ia-end strong { font-size: 1.6em; letter-spacing: .1em; color: var(--brand); }
+/* 老師已批改（首頁課次卡）、句型修改區 */
+.lesson-card .fb-badge { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 999px; background: #E8F4EC; color: #1F6B3E; font-size: .8em; font-weight: 700; }
+.lesson-card .fb-badge.new { background: #FFE9B8; color: #7A4B00; animation: pop .6s 2; }
+.lesson-card .fb-badge.redo { background: #FDE2D0; color: #9A3D0F; margin-left: 4px; }
+.redo-section .menu-title { color: #B5651D; }
+.redo-tip { text-align: center; }

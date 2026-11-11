@@ -255,6 +255,37 @@ test('teacher grades and student sees feedback', async () => {
   assert.deepEqual(s.errors, []); assert.deepEqual(t.errors, []);
 });
 
+test('teacher sends a sentence back: home badge, redo section, retry from redo page', async () => {
+  const s = await page(); await s.goto(BASE + '#/L06/pattern?s=bear&retry=pt-zy-w1');
+  await say(s, '只要下雨，我就很開心');
+  await s.waitForSelector('.feedback.ok >> text=等老師批改');
+  await s.waitForFunction(() => !JSON.parse(localStorage.getItem('k4a.speechbox') || '[]').length);
+  const id = speechFor('pt-zy-w1').filter(x => x.student === 'bear').at(-1).id;
+
+  const t = await page(); await t.goto(BASE + '#/teacher');
+  await t.fill('input[type=password]', 'teacher-pass'); await t.click('button[type=submit]');
+  const row = `.speech-row[data-id="${id}"]`;
+  await t.waitForSelector(row);
+  await t.fill(`${row} .note-input`, '前後要有關係喔');
+  await t.click(`${row} [data-grade="redo"]`);
+  await t.waitForSelector(`${row} .saved:text("已儲存")`, { state: 'attached' });
+
+  await s.goto(BASE + '#/L06?s=bear');
+  await s.waitForSelector('.redo-section [data-activity="redo"]');
+  assert.match(await s.textContent('.redo-section'), /有 1 句要修改/);
+  await s.evaluate(() => { location.hash = '#/'; });
+  await s.waitForSelector('.lesson-card[data-lesson="L06"] .fb-badge >> text=老師已批改');
+  await s.waitForSelector('.lesson-card[data-lesson="L06"] .fb-badge.redo >> text=1 句要修改');
+  await s.click('.lesson-card[data-lesson="L06"]');
+  await s.click('.redo-section [data-activity="redo"]');
+  await s.waitForSelector(`.redo-list .fb-card[data-id="${id}"]`);
+  assert.match(await s.textContent('.redo-list'), /前後要有關係/);
+  await s.click(`.fb-card[data-id="${id}"] >> text=🎤 再說一次`);
+  await s.waitForSelector('.mic-btn');
+  assert.match(s.url(), /retry=pt-zy-w1/);
+  assert.deepEqual(s.errors, []); assert.deepEqual(t.errors, []);
+});
+
 test('after teacher demo, a stuck student can send to teacher or ask for typing', async () => {
   const p = await page(); await p.goto(BASE + '#/L06/phrase?s=bear&retry=pm1');
   for (let k = 0; k < 3; k++) { await say(p, '我把顏料混和在一起'); await p.waitForTimeout(50); }

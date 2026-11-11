@@ -1,7 +1,7 @@
 /* 老師設定：裝置模式、自動念題目、任務連結、鎖定課文、清除紀錄 */
 (function (root) {
   var H3A = root.H3A; var h = H3A.ui.h;
-  var ACTS = ['read', 'map', 'quiz', 'test'];
+  var ACTS = ['read', 'map', 'quiz', 'test', 'feedback', 'redo'];
   function section(title) { var s = h('section', { class: 'panel' }, h('h2', {}, title)); return s; }
 
   H3A.pages.settings = function render(main, ctx) {
