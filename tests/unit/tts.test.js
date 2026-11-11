@@ -117,3 +117,9 @@ test('地 always dì (人事時地物), 都 dōu except 首都/都市', async ()
   const cases = [['人事時地物', '人事時弟物'], ['什麼地方', '什麼弟方'], ['大家都來了', '大家兜來了'], ['臺北是首都', '臺北是首都'], ['都市很熱鬧', '都市很熱鬧']];
   for (const [i, [a, b]] of cases.entries()) { await t.speak(a); assert.equal(s.spoken[i].text, b, a); }
 });
+
+test('部首宀念棉', () => {
+  const { fixSay } = require('../../assets/tts.js');
+  assert.equal(fixSay('宀'), '棉');
+  assert.equal(fixSay('上面是宀，下面是女'), '上面是棉，下面是女');
+});
