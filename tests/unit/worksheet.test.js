@@ -78,3 +78,21 @@ test('worksheet: reading only with an unlocked lesson; options shuffled, answer 
   assert.equal(sec.items.length, 3);
   for (const it of sec.items) { assert.match(it.a, /^[①②③④]對\d$/); assert.ok(it.opts.includes(it.a)); }
 });
+
+/* 分組學習單：中組五選一、低組三選一＋圖片＋題數較少；高組不變 */
+test('worksheet levels: mid 5 choices, low 3 choices with images, high unchanged', () => {
+  const n = ids[0], w = load(n), keys = WS.available(w).map(s => s.key);
+  const hi = WS.build(w, keys, 3, null, { level: 'high', lessonId: 'L' + n });
+  const mid = WS.build(w, keys, 3, null, { level: 'mid', lessonId: 'L' + n });
+  const low = WS.build(w, keys, 3, null, { level: 'low', lessonId: 'L' + n });
+  const v = s => s.find(x => x.key === 'vocab');
+  assert.ok(v(hi).bank && v(hi).items.every(it => !it.choices && !it.img && !it.marks));
+  assert.ok(!v(mid).bank && v(mid).items.every(it => it.choices.length === 5 && it.choices.some(c => c.slice(1) === it.a)));
+  assert.ok(!v(low).bank && v(low).items.every(it => it.choices.length === 3 && it.choices.some(c => c.slice(1) === it.a)));
+  assert.ok(v(low).items.length < v(hi).items.length);
+  assert.ok(v(low).items.some(it => /^images\/L\d\d\//.test(it.img)));
+  const fix = low.find(x => x.key === 'fix');
+  if (fix) for (const it of fix.items) if (it.choices) assert.ok(!it.choices.some(c => c.slice(1) === it.a.split(' → ')[0]), 'wrong char not offered');
+  const rh = mid.find(x => x.key === 'rhetoric');
+  if (rh) assert.ok(rh.items.some(it => it.marks && it.marks.length));
+});

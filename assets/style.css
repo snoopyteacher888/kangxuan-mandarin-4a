@@ -1064,6 +1064,11 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-items li.ws-hang > .ws-pre { float: left; }
 .ws-items li.ws-hang > .ws-body { overflow: hidden; }
 .ws-body .ws-opts { padding-left: 1em; }
+.ws-kw { font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; }
+.ws-choices { padding-left: 1em; gap: 0 1.4em; }
+.ws-hint { font-size: .8em; line-height: 1.5; color: #222; padding-left: 1em; }
+.ws-items li.ws-has-img::after { content: ""; display: block; clear: both; }
+.ws-img { float: right; width: 2.2cm; height: 2.2cm; object-fit: contain; margin: 0 0 4px 10px; filter: grayscale(1) contrast(1.15); }
 .ws-unlock input { font: inherit; padding: 4px 8px; width: 10em; }
 .ws-items.ws-key { columns: 2; }
 .ws-paper.ws-plain, .ws-paper.ws-plain * { font-family: var(--font) !important; }

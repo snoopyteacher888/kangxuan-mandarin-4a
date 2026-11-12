@@ -13,7 +13,32 @@
   /* 國字注音：一句一行，注音或國字加底線，後面接（　）（老師要求：改回橫式、用句子） */
   function sentenceItem(it) {
     var mark = it.kind === 'char' ? h('span', { class: 'ws-mark ws-mzy' }, it.parts[1]) : h('span', { class: 'ws-mark' }, bare(it.parts[1]));
-    return h('li', {}, it.parts[0], mark, it.kind === 'char' ? '（　　）' : '（　　　）', it.parts[2]);
+    return withImg(it, h('li', {}, it.parts[0], mark, it.kind === 'char' ? '（　　）' : '（　　　）', it.parts[2]));
+  }
+  /* 中組、低組：關鍵字加粗、畫底線（黑白影印也看得清楚） */
+  function marked(text, marks) {
+    if (!marks || !marks.length) return text;
+    var out = [], rest = text;
+    while (rest) {
+      var best = -1, word = '';
+      marks.forEach(function (m) { var i = m ? rest.indexOf(m) : -1; if (i >= 0 && (best < 0 || i < best || (i === best && m.length > word.length))) { best = i; word = m; } });
+      if (best < 0) { out.push(rest); break; }
+      if (best) out.push(rest.slice(0, best));
+      out.push(h('span', { class: 'ws-kw' }, word));
+      rest = rest.slice(best + word.length);
+    }
+    return out;
+  }
+  /* 低組：題目旁邊放圖（黑白）、下面放提示；選項（五選一、三選一）放在題目下面圈選 */
+  function extras(it) {
+    return [it.choices ? h('div', { class: 'ws-opts ws-choices' }, it.choices.map(function (o) { return h('span', {}, o); })) : null,
+      it.hint ? h('div', { class: 'ws-hint' }, '提示：' + String(it.hint).replace(/^提示：/, '')) : null];
+  }
+  function withImg(it, li) {
+    if (!it.img) return li;
+    li.classList.add('ws-has-img');
+    li.insertBefore(h('img', { class: 'ws-img', src: it.img, alt: '' }), li.firstChild);
+    return li;
   }
 
   function paper(meta, sections, opts) {
@@ -28,12 +53,12 @@
       if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.join('、')));
       box.appendChild(h('ol', { class: 'ws-items' + (sec.layout ? ' ws-' + sec.layout : '') }, sec.items.map(function (it) {
         if (it.parts) return sentenceItem(it);
-        if (it.head) return h('li', {}, bare(it.head), it.q.slice(it.head.length));
+        if (it.head) return withImg(it, h('li', {}, bare(it.head), it.q.slice(it.head.length)));
         /* 前面有（　）的題目：換行時對齊題目的第一個字（老師要求） */
         var m = /^(（[　]+）)(.*)$/.exec(it.q);
         var opts = it.opts ? h('div', { class: 'ws-opts' }, it.opts.map(function (o) { return h('span', {}, o); })) : null;
-        if (m) return h('li', { class: 'ws-hang' + (it.line ? ' ws-line' : '') }, h('span', { class: 'ws-pre' }, m[1]), h('div', { class: 'ws-body' }, m[2], opts));
-        return h('li', { class: it.line ? 'ws-line' : '' }, it.q, opts);
+        if (m) return withImg(it, h('li', { class: 'ws-hang' + (it.line ? ' ws-line' : '') }, h('span', { class: 'ws-pre' }, m[1]), h('div', { class: 'ws-body' }, marked(m[2], it.marks), opts, extras(it))));
+        return withImg(it, h('li', { class: it.line ? 'ws-line' : '' }, h('div', { class: 'ws-body' }, marked(it.q, it.marks), opts, extras(it))));
       })));
       sheet.appendChild(box);
     });
@@ -59,7 +84,7 @@
   H3A.pages.worksheet = function (main, ctx) {
     var list = lessonsWithWords();
     if (!list.length) { main.appendChild(h('p', { class: 'notice' }, '還沒有可以印的課次。')); return; }
-    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, land: false, seed: 1, lesson: null, locked: false };
+    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, land: false, seed: 1, lesson: null, locked: false, level: 'high' };
     if (!list.some(function (l) { return l.id === state.id; })) state.id = list[0].id;
     var controls = h('div', { class: 'ws-controls' });
     var preview = h('div', { class: 'ws-preview' });
@@ -91,6 +116,13 @@
         return h('label', { class: 'ws-check' }, h('input', Object.assign({ type: 'checkbox', checked: on, onchange: function (e) { flip(e.target.checked); draw(); } }, extra || {})), label);
       }
       controls.appendChild(h('div', { class: 'ws-row' }, h('label', {}, '課次：', select)));
+      /* 分組（老師要求）：高組＝原本；中組＝選詞五選一、選擇題圈關鍵字；低組＝三選一、附黑白圖片和提示、題數少一點 */
+      var LV = [['high', '高組'], ['mid', '中組'], ['low', '低組']];
+      controls.appendChild(h('div', { class: 'ws-row ws-levels' }, h('span', { class: 'ws-label' }, '組別：'), LV.map(function (lv) {
+        return h('label', { class: 'ws-check' }, h('input', { type: 'radio', name: 'ws-level', value: lv[0], checked: state.level === lv[0],
+          onchange: function () { state.level = lv[0]; draw(); } }), lv[1]);
+      }), h('span', { class: 'small ws-level-note' }, state.level === 'mid' ? '選詞改成五選一，選擇題的關鍵字加粗畫線' :
+        state.level === 'low' ? '選詞三選一，附黑白圖片和提示，題數少一點' : '原本的題目')));
       var all = avail.every(function (s) { return state.keys.indexOf(s.key) >= 0; });
       controls.appendChild(h('div', { class: 'ws-row' }, h('span', { class: 'ws-label' }, '題型：'),
         check('全選', all, function (on) { state.keys = on ? avail.map(function (s) { return s.key; }) : []; }, { class: 'ws-all' }),
@@ -109,7 +141,8 @@
         h('button', { type: 'button', class: 'btn ws-shuffle', onclick: function () { state.seed += 1; draw(); } }, '🔀 換一份題目')));
       pageStyle(state.land);
       var meta = list.filter(function (l) { return l.id === state.id; })[0];
-      var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson, { makeword: (root.H3A_CONFIG || {}).worksheetMakeword });
+      var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson,
+        { makeword: (root.H3A_CONFIG || {}).worksheetMakeword, level: state.level, lessonId: state.id });
       if (!sections.length) { preview.appendChild(h('p', { class: 'notice' }, '請至少選一種題型。')); return; }
       preview.appendChild(paper(meta, sections, state));
     }
