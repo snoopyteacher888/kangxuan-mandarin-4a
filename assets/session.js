@@ -6,7 +6,7 @@
 
   function settings() {
     var s = store.get('settings', {});
-    return { mode: s.mode === 'class' ? 'class' : 'student', student: s.student || null, auto: !!s.auto, zhuyin: s.zhuyin !== false };
+    return { mode: s.mode === 'class' ? 'class' : 'student', student: s.student || null, auto: !!s.auto, zhuyin: s.zhuyin === true }; /* 四到六年級預設不顯示注音，老師設定勾選才顯示（老師要求） */
   }
   function saveSettings(patch) {
     var s = settings(); Object.keys(patch).forEach(function (k) { s[k] = patch[k]; });
