@@ -61,8 +61,8 @@
       return { title: '國字注音', say: '看注音寫國字，看國字寫注音，寫在（　）裡。',
         items: list.map(function (h, i) {
           var at = h.sentence.indexOf(h.char), before = h.sentence.slice(0, at), after = h.sentence.slice(at + 1);
-          return i < half ? { kind: 'char', parts: [before, h.zhuyin, after], q: before + h.zhuyin + '（　　）' + after, a: h.char, img: img(h.img) }
-            : { kind: 'zy', parts: [before, h.char, after], q: before + h.char + '（　　　）' + after, a: h.zhuyin, img: img(h.img) };
+          return i < half ? { kind: 'char', parts: [before, h.zhuyin, after], q: before + h.zhuyin + '（　　）' + after, a: h.char }
+            : { kind: 'zy', parts: [before, h.char, after], q: before + h.char + '（　　　）' + after, a: h.zhuyin };
         }) };
     },
     /* 造詞：每個生字造一個詞；二、三年級加寫注音，四年級加寫部首（opts.makeword === 'radical'） */
@@ -98,7 +98,7 @@
       var list = take(w.idioms, n('idiom'), r), all = w.idioms.map(function (x) { return x.idiom; });
       return { title: '成語填空', say: '從成語盒裡選出適當的成語，寫在句子裡。', sayPick: '圈出正確的成語，寫在句子裡。',
         bank: quizgen.shuffle(list.map(function (x) { return x.idiom; }), r),
-        items: list.map(function (x) { return { q: x.example.replace(x.idiom, '＿＿＿＿＿＿'), a: x.idiom, img: img(x.situationImg), fill: { ans: x.idiom, pool: all } }; }) };
+        items: list.map(function (x) { return { q: x.example.replace(x.idiom, '＿＿＿＿＿＿'), a: x.idiom, fill: { ans: x.idiom, pool: all } }; }) };
     },
     /* 短語短句：看圖選詞的短語挖空（從短語盒選詞填進括號），再用語詞造短句（老師要求） */
     phrase: function (w, r) {
@@ -114,6 +114,17 @@
           img: img(x.img), pool: x.options };
       });
       var answers = picks.map(function (x) { return x.ans; });
+      /* 高組：照樣寫短語（老師要求：高組自己造樣造句） */
+      if (LEVEL === 'high') {
+        picks.slice(0, 3).forEach(function (x, i) {
+          var other = picks[(i + 1) % picks.length];
+          items.push({ q: '例：' + x.a + '　→　＿＿＿＿＿＿＿＿＿＿＿＿', a: '參考：' + (other && other !== x ? other.a : x.a), line: true });
+        });
+        take(p.make || [], MAX.phraseMake, r).forEach(function (x) {
+          items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
+        });
+        return { title: '短語短句', say: '照樣寫短語：看例子，寫出一個同樣結構的短語；再用語詞寫一個句子。', items: items };
+      }
       picks.forEach(function (x) { items.push({ q: x.q, a: x.a, img: x.img, fill: { ans: x.ans, pool: uniq((x.pool || []).concat(answers)) } }); });
       take(p.make || [], LEVEL === 'low' ? 1 : MAX.phraseMake, r).forEach(function (x) {
         items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
@@ -123,6 +134,18 @@
     },
     pattern: function (w, r) {
       var items = [];
+      /* 高組：照樣造句（老師要求：高組自己造樣造句） */
+      if (LEVEL === 'high') {
+        w.pattern.forEach(function (pt) {
+          var ex = (pt.examples || []).concat((pt.conj || []).map(function (c) { return c.full; }));
+          var models = (pt.whole || []).map(function (x) { return x.model; }).concat((pt.half || []).map(function (x) { return x.front + x.model; }));
+          var times = w.pattern.length === 1 ? 2 : 1;
+          for (var i = 0; i < times && i < ex.length; i++) {
+            items.push({ q: '【' + pt.title + '】例：' + ex[i] + '\n＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿', a: '參考：' + (models[i] || models[0] || ex[i]), line: true });
+          }
+        });
+        return { title: '句型練習', say: '照樣造句：看例句，用同樣的句型寫出自己的句子。', items: items };
+      }
       w.pattern.forEach(function (pt) {
         take(pt.conj || [], 1, r).forEach(function (c) {
           items.push({ q: blank(c.sentence), a: c.full, tag: pt.title, img: img(c.img), fill: c.options ? { ans: pt.title, pool: uniq(c.options) } : null });

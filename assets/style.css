@@ -1064,6 +1064,7 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-items li.ws-hang > .ws-pre { float: left; }
 .ws-items li.ws-hang > .ws-body { overflow: hidden; }
 .ws-body .ws-opts { padding-left: 1em; }
+.ws-items .ws-body { white-space: pre-line; }
 .ws-kw { font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; }
 .ws-choices { padding-left: 1em; gap: 0 1.4em; }
 .ws-hint { font-size: .8em; line-height: 1.5; color: #222; padding-left: 1em; }
