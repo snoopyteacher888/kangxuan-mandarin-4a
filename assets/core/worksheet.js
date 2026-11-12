@@ -114,16 +114,31 @@
           img: img(x.img), pool: x.options };
       });
       var answers = picks.map(function (x) { return x.ans; });
-      /* 高組：照樣寫短語（老師要求：高組自己造樣造句） */
+      /* 高組：照樣寫短語（老師的學習單格式）：例子的每一塊都加括號，下一行寫「結構」，再一個「例」，最後空括號讓學生自己寫 */
       if (LEVEL === 'high') {
-        picks.slice(0, 3).forEach(function (x, i) {
-          var other = picks[(i + 1) % picks.length];
-          items.push({ q: '例：' + x.a + '　→　＿＿＿＿＿＿＿＿＿＿＿＿', a: '參考：' + (other && other !== x ? other.a : x.a), line: true });
-        });
+        var L = p.fillLabels || {}, raw = take((p.pick || []).filter(function (x) { return x.options && x.options[0]; }), 3, r);
+        var cells = function (x, blankIt) {
+          var join = x.join === undefined || x.join === null ? '的' : x.join, noun = String(x.noun || '').replace(/。$/, ''), out = [];
+          var box = function (t, label) { out.push({ t: blankIt ? '' : t, box: true, label: label || '' }); };
+          if (x.before) box(x.before, L.before);
+          box(x.options[0], L.answer);
+          if (join) out.push({ t: join });
+          if (noun) { if (noun === '了' || noun === '的') out.push({ t: noun }); else box(noun, L.noun); }
+          return out;
+        };
+        if (raw.length >= 2) {
+          var c0 = cells(raw[0]), labels = c0.map(function (c) { return c.box ? { t: c.label, box: true } : { t: c.t }; });
+          var rows = [{ cells: c0 }];
+          if (labels.some(function (c) { return c.box && c.t; })) rows.push({ head: '結構', cells: labels });
+          rows.push({ head: '例', cells: cells(raw[1]) }, { cells: cells(raw[0], true) }, { cells: cells(raw[0], true) });
+          var flat = function (cs) { return cs.map(function (c) { return c.box ? '（' + (c.t || '　　') + '）' : c.t; }).join(''); };
+          items.push({ q: rows.map(function (row) { return (row.head ? row.head + '　' : '') + flat(row.cells); }).join('\n'), rows: rows,
+            a: '參考：' + flat(cells(raw[2] || raw[1])) });
+        }
         take(p.make || [], MAX.phraseMake, r).forEach(function (x) {
           items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
         });
-        return { title: '短語短句', say: '照樣寫短語：看例子，寫出一個同樣結構的短語；再用語詞寫一個句子。', items: items };
+        return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語；再用語詞寫一個句子。', items: items };
       }
       picks.forEach(function (x) { items.push({ q: x.q, a: x.a, img: x.img, fill: { ans: x.ans, pool: uniq((x.pool || []).concat(answers)) } }); });
       take(p.make || [], LEVEL === 'low' ? 1 : MAX.phraseMake, r).forEach(function (x) {

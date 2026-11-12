@@ -1065,6 +1065,11 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-items li.ws-hang > .ws-body { overflow: hidden; }
 .ws-body .ws-opts { padding-left: 1em; }
 .ws-items .ws-body { white-space: pre-line; }
+.ws-ptable { border-collapse: collapse; }
+.ws-ptable td { padding: 0 .1em; white-space: nowrap; vertical-align: baseline; }
+.ws-ptable .ws-phead { width: 3em; }
+.ws-ptable .ws-pbox { text-align: center; }
+.ws-pin { display: inline-block; min-width: 4.5em; text-align: center; }
 .ws-kw { font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; }
 .ws-choices { padding-left: 1em; gap: 0 1.4em; }
 .ws-hint { font-size: .8em; line-height: 1.5; color: #222; padding-left: 1em; }

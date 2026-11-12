@@ -52,6 +52,12 @@
       /* 語詞盒、成語盒：用頓號隔開（老師要求） */
       if (sec.bank) box.appendChild(h('div', { class: 'ws-bank' }, sec.bank.join('、')));
       box.appendChild(h('ol', { class: 'ws-items' + (sec.layout ? ' ws-' + sec.layout : '') }, sec.items.map(function (it) {
+        /* 照樣寫短語：一行一行，每一塊用括號框起來（老師的學習單格式） */
+        if (it.rows) return h('li', { class: 'ws-phrase-grid' }, h('table', { class: 'ws-ptable' }, h('tbody', {}, it.rows.map(function (row) {
+          return h('tr', {}, h('td', { class: 'ws-phead' }, row.head || ''), row.cells.map(function (c) {
+            return c.box ? h('td', { class: 'ws-pbox' }, '（', h('span', { class: 'ws-pin' }, c.t || ''), '）') : h('td', { class: 'ws-pjoin' }, c.t);
+          }));
+        }))));
         if (it.parts) return sentenceItem(it);
         if (it.head) return withImg(it, h('li', {}, bare(it.head), it.q.slice(it.head.length)));
         /* 前面有（　）的題目：換行時對齊題目的第一個字（老師要求） */
