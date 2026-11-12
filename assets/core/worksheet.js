@@ -136,28 +136,9 @@
             a: '參考：' + flat(cells(raw[2] || raw[1])) });
           return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語。', items: items };
         }
-        take(p.make || [], MAX.phraseMake, r).forEach(function (x) {
-          items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
-        });
-        return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語；再用語詞寫一個句子。', items: items };
       }
       picks.forEach(function (x) { items.push({ q: x.q, a: x.a, img: x.img, fill: { ans: x.ans, pool: uniq((x.pool || []).concat(answers)) } }); });
-      /* 造句：低組給前半句＋圖片，學生接著寫完；中組一句給前半句、一句自己造（老師要求） */
-      var wordImg = function (word) {
-        var hit = (p.words || []).concat(w.vocab || []).filter(function (v) { return v.word === word && v.img; })[0];
-        return hit ? img(hit.img) : null;
-      };
-      var front = function (x) {
-        var m = String(x.model || ''), at = m.indexOf(x.word);
-        if (at >= 2) return m.slice(0, at);
-        var c = m.indexOf('，'); return c > 0 && c < m.length - 2 ? m.slice(0, c + 1) : '';
-      };
-      take(p.make || [], LEVEL === 'low' ? 1 : MAX.phraseMake, r).forEach(function (x, i) {
-        var f = LEVEL !== 'high' && (LEVEL === 'low' || i === 0) ? front(x) : '';
-        if (f) items.push({ q: '用「' + x.word + '」把句子寫完：' + f + '＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true, img: wordImg(x.word) });
-        else items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
-      });
-      return { title: '短語短句', say: '從短語盒裡選出適當的詞，寫在括號裡；再用語詞寫一個句子。', sayPick: '圈出適當的詞，寫在括號裡；再用語詞把句子寫完。',
+      return { title: '短語短句', say: '從短語盒裡選出適當的詞，寫在括號裡。', sayPick: '圈出適當的詞，寫在括號裡。',
         bank: picks.length ? quizgen.shuffle(picks.map(function (x) { return x.ans; }), r) : null, items: items };
     },
     pattern: function (w, r) {
