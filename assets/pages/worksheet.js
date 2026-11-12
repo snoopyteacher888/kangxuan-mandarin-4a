@@ -54,7 +54,12 @@
       box.appendChild(h('ol', { class: 'ws-items' + (sec.layout ? ' ws-' + sec.layout : '') }, sec.items.map(function (it) {
         /* 照樣寫短語：一行一行，每一塊用括號框起來（老師的學習單格式） */
         if (it.rows) return h('li', { class: 'ws-phrase-grid' }, h('table', { class: 'ws-ptable' }, h('tbody', {}, it.rows.map(function (row) {
-          return h('tr', {}, h('td', { class: 'ws-phead' }, row.head || ''), row.cells.map(function (c) {
+          /* 第一行像課文頁的短語卡：每塊一個框、框下小字寫結構（老師要求） */
+          if (row.card) return h('tr', { class: 'ws-pcards' }, row.cells.map(function (c) {
+            return h('td', { class: 'ws-pbox' }, h('div', { class: 'ws-pcard' + (c.box ? '' : ' ws-pcard-join') }, h('div', { class: 'ws-pword' }, c.t || ''),
+              c.box && c.label ? h('div', { class: 'ws-plabel' }, c.label) : null));
+          }));
+          return h('tr', {}, row.cells.map(function (c) {
             return c.box ? h('td', { class: 'ws-pbox' }, '（', h('span', { class: 'ws-pin' }, c.t || ''), '）') : h('td', { class: 'ws-pjoin' }, c.t);
           }));
         }))));

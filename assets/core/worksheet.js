@@ -135,12 +135,11 @@
           return out;
         };
         if (raw.length >= 2) {
-          var c0 = cells(raw[0]), labels = c0.map(function (c) { return c.box ? { t: c.label, box: true } : { t: c.t }; });
-          var rows = [{ cells: c0 }];
-          if (labels.some(function (c) { return c.box && c.t; })) rows.push({ head: '結構', cells: labels });
-          rows.push({ head: '例', cells: cells(raw[1]) }, { cells: cells(raw[0], true) }, { cells: cells(raw[0], true) });
+          /* 老師要求：不放「例」；結構像課文頁的短語卡：每一塊一個框，框下面小字寫結構 */
+          var rows = [{ card: true, cells: cells(raw[0]) }, { cells: cells(raw[0], true) }, { cells: cells(raw[0], true) }];
           var flat = function (cs) { return cs.map(function (c) { return c.box ? '（' + (c.t || '　　') + '）' : c.t; }).join(''); };
-          items.push({ q: rows.map(function (row) { return (row.head ? row.head + '　' : '') + flat(row.cells); }).join('\n'), rows: rows,
+          var sub = rows[0].cells.map(function (c) { return c.box && c.label ? c.label : ''; }).filter(Boolean).join('＋');
+          items.push({ q: rows.map(function (row) { return flat(row.cells); }).join('\n') + (sub ? '\n結構：' + sub : ''), rows: rows,
             a: '參考：' + flat(cells(raw[2] || raw[1])) });
           made = true;
         }
