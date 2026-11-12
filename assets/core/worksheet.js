@@ -134,12 +134,7 @@
           var flat = function (cs) { return cs.map(function (c) { return c.box ? '（' + (c.t || '　　') + '）' : c.t; }).join(''); };
           items.push({ q: rows.map(function (row) { return (row.head ? row.head + '　' : '') + flat(row.cells); }).join('\n'), rows: rows,
             a: '參考：' + flat(cells(raw[2] || raw[1])) });
-          /* 造句要接著上面的短語練（老師指出：另外出語詞造句跟短語沒關係） */
-          var plain = function (cs) { return cs.map(function (c) { return c.t; }).join(''); };
-          items.push({ q: '把你寫的短語放進句子裡，寫成一個完整的句子：\n＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
-            a: '參考：' + plain(cells(raw[1])) + '……（句子裡要用到自己寫的短語）', line: true });
-          items.push({ q: '再用另一個你寫的短語寫一個句子：\n＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿', a: '自由作答', line: true });
-          return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語；再把自己寫的短語放進句子裡。', items: items };
+          return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語。', items: items };
         }
         take(p.make || [], MAX.phraseMake, r).forEach(function (x) {
           items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
