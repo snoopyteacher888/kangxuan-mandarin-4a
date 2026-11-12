@@ -12,17 +12,19 @@
     { key: 'similar', title: '形近字選選看', need: 'similar' },
     { key: 'fix', title: '改錯字', need: 'fix' },
     { key: 'idiom', title: '成語填空', need: 'idioms' },
+    { key: 'phrase', title: '短語短句', need: 'phrase' },
     { key: 'pattern', title: '句型練習', need: 'pattern' },
     { key: 'rhetoric', title: '修辭小偵探', need: 'rhetoric' },
     { key: 'reading', title: '課文閱讀理解', need: 'lesson' }
   ];
   var NUM = ['①', '②', '③', '④', '⑤', '⑥'];
-  var MAX = { reading: 8, makeword: 8, zhuyin: 10, vocab: 10, similar: 8, fix: 8, idiom: 5, pattern: 6, rhetoric: 6 };
+  var MAX = { reading: 8, makeword: 8, zhuyin: 10, vocab: 10, similar: 8, fix: 8, idiom: 5, phrase: 5, phraseMake: 2, pattern: 6, rhetoric: 6 };
 
   function has(words, key, lesson) {
     if (key === 'lesson') return !!(lesson && lesson.quiz && lesson.quiz.length);
     var v = words && words[key];
     if (key === 'rhetoric') return !!(v && v.quiz && v.quiz.length);
+    if (key === 'phrase') return !!(v && ((v.pick && v.pick.length) || (v.make && v.make.length)));
     return !!v && (!Array.isArray(v) || v.length > 0);
   }
   /* 這一課有資料的區塊 */
@@ -83,6 +85,25 @@
       return { title: '成語填空', say: '從成語盒裡選出適當的成語，寫在句子裡。',
         bank: quizgen.shuffle(list.map(function (x) { return x.idiom; }), r),
         items: list.map(function (x) { return { q: x.example.replace(x.idiom, '＿＿＿＿＿＿'), a: x.idiom }; }) };
+    },
+    /* 短語短句：看圖選詞的短語挖空（從短語盒選詞填進括號），再用語詞造短句（老師要求） */
+    phrase: function (w, r) {
+      var p = w.phrase, items = [];
+      var picks = take((p.pick || []).filter(function (x) { return x.options && x.options[0]; }), MAX.phrase, r).map(function (x) {
+        var ans = x.options[0], m = /完整的短語是「([^」]+)」/.exec(x.explain || ''), full;
+        if (m && m[1].indexOf(ans) >= 0) full = m[1];
+        else full = (x.before || '') + ans + (x.join === undefined ? '的' : x.join) + String(x.noun || '').replace(/。$/, '');
+        var at = full.indexOf(ans);
+        /* 紙上沒有圖，附上提示，才知道要填哪一個 */
+        var hint = String(x.clue || '').replace(/^提示：/, '');
+        return { q: full.slice(0, at) + '（　　　）' + full.slice(at + ans.length) + (hint ? '　（' + hint.replace(/[。！]$/, '') + '）' : ''), a: full, ans: ans };
+      });
+      picks.forEach(function (x) { items.push({ q: x.q, a: x.a }); });
+      take(p.make || [], MAX.phraseMake, r).forEach(function (x) {
+        items.push({ q: '用「' + x.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿', a: x.model, line: true });
+      });
+      return { title: '短語短句', say: '從短語盒裡選出適當的詞，寫在括號裡；再用語詞寫一個句子。',
+        bank: picks.length ? quizgen.shuffle(picks.map(function (x) { return x.ans; }), r) : null, items: items };
     },
     pattern: function (w, r) {
       var items = [];
