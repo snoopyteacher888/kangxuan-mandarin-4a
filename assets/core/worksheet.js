@@ -103,20 +103,28 @@
     /* 短語短句：看圖選詞的短語挖空（從短語盒選詞填進括號），再用語詞造短句（老師要求） */
     phrase: function (w, r) {
       var p = w.phrase, items = [];
-      var picks = take((p.pick || []).filter(function (x) { return x.options && x.options[0]; }), n('phrase'), r).map(function (x) {
+      var valid = quizgen.shuffle((p.pick || []).filter(function (x) { return x.options && x.options[0]; }), r);
+      /* 中組（老師要求）：選詞填寫只出三題、不附提示，最後一題照樣寫短語（跟高組同題型） */
+      var nPick = LEVEL === 'mid' ? 3 : n('phrase');
+      var picks = LEVEL === 'high' ? [] : valid.slice(0, nPick).map(function (x) {
         var ans = x.options[0], m = /完整的短語是「([^」]+)」/.exec(x.explain || ''), full;
         if (m && m[1].indexOf(ans) >= 0) full = m[1];
         else full = (x.before || '') + ans + (x.join === undefined ? '的' : x.join) + String(x.noun || '').replace(/。$/, '');
         var at = full.indexOf(ans);
-        /* 紙上沒有圖，附上提示，才知道要填哪一個 */
-        var hint = String(x.clue || '').replace(/^提示：/, '');
+        /* 低組：紙上沒有彩圖，附上提示，才知道要填哪一個；中組不給提示，除非題目本身沒有線索（例如「（　）的時候」） */
+        var bare = full.replace(ans, '').length < 4;
+        var hint = LEVEL === 'low' || bare ? String(x.clue || '').replace(/^提示：/, '') : '';
         return { q: full.slice(0, at) + '（　　　）' + full.slice(at + ans.length) + (hint ? '　（' + hint.replace(/[。！]$/, '') + '）' : ''), a: full, ans: ans,
           img: img(x.img), pool: x.options };
       });
       var answers = picks.map(function (x) { return x.ans; });
-      /* 高組：照樣寫短語（老師的學習單格式）：例子的每一塊都加括號，下一行寫「結構」，再一個「例」，最後空括號讓學生自己寫 */
-      if (LEVEL === 'high') {
-        var L = p.fillLabels || {}, raw = take((p.pick || []).filter(function (x) { return x.options && x.options[0]; }), 3, r);
+      picks.forEach(function (x) { items.push({ q: x.q, a: x.a, img: x.img, fill: { ans: x.ans, pool: uniq((x.pool || []).concat(answers)) } }); });
+      /* 照樣寫短語（老師的學習單格式）：例子的每一塊都加括號，下一行寫「結構」，再一個「例」，最後空括號讓學生自己寫。
+         中組用選詞題沒出過的短語，免得表格第一行洩漏答案 */
+      var made = false;
+      if (LEVEL !== 'low') {
+        var rest = valid.slice(picks.length), raw = rest.concat(valid.slice(0, picks.length)).slice(0, 3);
+        var L = p.fillLabels || {};
         var cells = function (x, blankIt) {
           var join = x.join === undefined || x.join === null ? '的' : x.join, noun = String(x.noun || '').replace(/。$/, ''), out = [];
           var box = function (t, label) { out.push({ t: blankIt ? '' : t, box: true, label: label || '' }); };
@@ -134,11 +142,12 @@
           var flat = function (cs) { return cs.map(function (c) { return c.box ? '（' + (c.t || '　　') + '）' : c.t; }).join(''); };
           items.push({ q: rows.map(function (row) { return (row.head ? row.head + '　' : '') + flat(row.cells); }).join('\n'), rows: rows,
             a: '參考：' + flat(cells(raw[2] || raw[1])) });
-          return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語。', items: items };
+          made = true;
         }
       }
-      picks.forEach(function (x) { items.push({ q: x.q, a: x.a, img: x.img, fill: { ans: x.ans, pool: uniq((x.pool || []).concat(answers)) } }); });
-      return { title: '短語短句', say: '從短語盒裡選出適當的詞，寫在括號裡。', sayPick: '圈出適當的詞，寫在括號裡。',
+      if (LEVEL === 'high') return { title: '短語短句', say: '照樣寫短語：照著括號裡的結構，在空括號寫出自己的短語。', items: items };
+      var tail = made ? '；最後照樣寫短語。' : '。';
+      return { title: '短語短句', say: '從短語盒裡選出適當的詞，寫在括號裡' + tail, sayPick: '圈出適當的詞，寫在括號裡' + tail,
         bank: picks.length ? quizgen.shuffle(picks.map(function (x) { return x.ans; }), r) : null, items: items };
     },
     pattern: function (w, r) {
