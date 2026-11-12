@@ -411,7 +411,7 @@ test('teacher roster masks a full name to the middle character', async () => {
   const inp = '.roster-list input[aria-label="顯示名稱"]';
   await t.waitForSelector(inp);
   await t.fill(inp, '王宥廷'); await t.press(inp, 'Tab');
-  assert.equal(await t.inputValue(inp), 'O宥O');
+  assert.equal(await t.inputValue(inp), 'OO廷');
   assert.deepEqual(t.errors, []);
 });
 

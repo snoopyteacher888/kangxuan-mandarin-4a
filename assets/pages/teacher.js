@@ -9,13 +9,12 @@
     ['deer', '🦌', '小鹿'], ['chick', '🐥', '小雞'], ['seal', '🦭', '海豹'], ['octopus', '🐙', '章魚'], ['horse', '🐴', '小馬']];
   var RESULT = { first: '✅ 第一次就答對', hint1: '🟡 答錯 1 次後答對', hint2: '🟠 答錯 2 次後答對', taught: '📘 答錯 3 次，看了老師說明', wrong: '❌ 答錯', pending: '👩‍🏫 等老師批改' };
   var PLACE = { home: '家裡', school: '學校' };
-  /* 名冊只留名字中間的字：王宥廷 → O宥O、陳安 → O安、歐陽宥廷 → OO宥O；不是 2～4 個中文字或是動物名稱就照原樣 */
+  /* 名冊只留名字最後一個字：王宥廷 → OO廷、陳安 → O安、歐陽宥廷 → OOO廷（中間的字常重複，老師要求改成最後一個字）；
+     不是 2～4 個中文字或是動物名稱就照原樣 */
   function maskName(s) {
     s = String(s || '').trim();
     if (!/^[\u3400-\u9fff]{2,4}$/.test(s) || ANIMALS.some(function (a) { return a[2] === s; })) return s;
-    if (s.length === 2) return 'O' + s[1];
-    if (s.length === 3) return 'O' + s[1] + 'O';
-    return 'OO' + s[2] + 'O';
+    return new Array(s.length).join('O') + s[s.length - 1];
   }
   H3A.pages = H3A.pages || {}; H3A.pages.maskName = maskName;
 
@@ -228,7 +227,7 @@
     function showRoster() {
       H3A.ui.clear(rosterBox);
       rosterBox.appendChild(h('h2', {}, '學生名冊'));
-      rosterBox.appendChild(h('p', { class: 'small' }, '輸入學生的名字（例如王宥廷），會自動變成 O宥O，只留中間那個字，完整姓名不會存到網站上。'));
+      rosterBox.appendChild(h('p', { class: 'small' }, '輸入學生的名字（例如王宥廷），會自動變成 OO廷，只留最後一個字，完整姓名不會存到網站上。'));
       var rows = roster.map(function (r) { return { id: r.id, emoji: r.emoji, name: r.name }; });
       var list = h('div', { class: 'roster-list' });
       function draw() {
