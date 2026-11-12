@@ -54,3 +54,30 @@ test('encrypt several lessons at once into one zip', async () => {
   assert.equal(ok, 'L02');
   assert.deepEqual(errors, []);
 });
+
+test('a zip downloaded from Google Drive (deflate) works too', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'encz-'));
+  const zf = path.join(dir, 'drive-download.zip');
+  require('child_process').execFileSync('python3', ['-I', '-c', `
+import zipfile,sys,json
+src=json.load(open(sys.argv[2],encoding='utf8'))
+z=zipfile.ZipFile(sys.argv[1],'w',zipfile.ZIP_DEFLATED)
+for i in ('L03','L04'):
+  src['id']=i; z.writestr('六上_lesson'+i[1:]+'.plain.json', json.dumps(src,ensure_ascii=False))
+z.writestr('lesson03.enc.js','window.ENC=1')
+z.close()`, zf, path.join(__dirname, '../fixtures/fake06.plain.json')]);
+  const ctx = await browser.newContext({ acceptDownloads: true });
+  const p = await ctx.newPage();
+  const errors = []; p.on('pageerror', e => errors.push(e.message));
+  await p.goto(BASE + '#/');
+  const prefix = await p.evaluate(() => (window.H3A.ui.gateOk.toString().match(/getItem\('([^']+)'\)/) || [])[1]);
+  await p.evaluate(k => sessionStorage.setItem(k, '1'), prefix);
+  await p.goto(BASE + '#/teacher/encrypt');
+  await p.setInputFiles('input[type=file]', zf);
+  await p.fill('input[aria-label="教室密碼"]', 'zip-pass-1');
+  await p.fill('input[aria-label="再輸入一次"]', 'zip-pass-1');
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('text=加密並下載')]).catch(async e => { throw new Error(await p.textContent('form')); });
+  const zip = readZip(fs.readFileSync(await dl.path()));
+  assert.deepEqual(Object.keys(zip).sort(), ['lesson03.enc.js', 'lesson04.enc.js']);
+  assert.deepEqual(errors, []);
+});

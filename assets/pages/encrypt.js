@@ -29,6 +29,37 @@
     var a = h('a', { href: URL.createObjectURL(blob), download: name });
     document.body.appendChild(a); a.click(); a.remove();
   }
+  /* 讀 zip（Google 雲端一次下載好幾個檔，會變成一個 zip）：回傳 [{ name, text }]，只留原稿 .json */
+  function readZip(f) {
+    return (f.arrayBuffer ? f.arrayBuffer() : new Promise(function (ok, fail) { var r = new FileReader(); r.onload = function () { ok(r.result); }; r.onerror = fail; r.readAsArrayBuffer(f); }))
+      .then(function (ab) {
+        var b = new Uint8Array(ab), dv = new DataView(ab), e = -1;
+        for (var i = b.length - 22; i >= Math.max(0, b.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+        if (e < 0) throw new Error(f.name + '：壓縮檔壞掉了，請重新下載');
+        var count = dv.getUint16(e + 10, true), at = dv.getUint32(e + 16, true), list = [];
+        for (var k = 0; k < count; k++) {
+          var method = dv.getUint16(at + 10, true), csize = dv.getUint32(at + 20, true), nlen = dv.getUint16(at + 28, true),
+            xlen = dv.getUint16(at + 30, true), clen = dv.getUint16(at + 32, true), off = dv.getUint32(at + 42, true);
+          var name = new TextDecoder().decode(b.subarray(at + 46, at + 46 + nlen));
+          var start = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+          if (/\.json$/i.test(name) && !/(^|\/)__MACOSX\//.test(name)) list.push({ name: name.split('/').pop(), method: method, data: b.subarray(start, start + csize) });
+          at += 46 + nlen + xlen + clen;
+        }
+        return Promise.all(list.map(function (x) {
+          if (x.method === 0) return { name: x.name, text: new TextDecoder().decode(x.data) };
+          if (x.method !== 8 || typeof DecompressionStream === 'undefined') throw new Error('這台裝置不能直接讀壓縮檔，請先把 zip 解壓縮，再選裡面的 .plain.json 檔');
+          return new Response(new Blob([x.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()
+            .then(function (t) { return { name: x.name, text: t }; });
+        }));
+      });
+  }
+  /* 選到的檔案攤平成 [{ name, text }]：zip 會自動打開 */
+  function readAll(files) {
+    return Promise.all(files.map(function (f) {
+      if (/\.zip$/i.test(f.name)) return readZip(f);
+      return readText(f).then(function (t) { return [{ name: f.name, text: t }]; });
+    })).then(function (lists) { return [].concat.apply([], lists); });
+  }
   H3A.pages.encrypt = function (main, ctx) {
     if (!H3A.ui.gateOk()) { ctx.go('#/'); return; }
     /* 不限制副檔名：雲端改過檔名或 iPad 的檔案類型不對時，也選得到 */
@@ -46,8 +77,10 @@
       if (pw1.value !== pw2.value) { msg.textContent = '兩次輸入的密碼不一樣'; return; }
       btn.disabled = true;
       var keyP = H3A.cryptobox.deriveKey(pw1.value, root.H3A_SALT);
-      Promise.all(list.map(function (f) {
-        return readText(f).then(function (txt) {
+      readAll(list).then(function (items) {
+        if (!items.length) throw new Error('壓縮檔裡沒有原稿檔（要有 .plain.json）');
+        return Promise.all(items.map(function (f) {
+        return Promise.resolve(f.text).then(function (txt) {
           var lesson;
           try { lesson = JSON.parse(txt.replace(/^\uFEFF/, '')); } catch (err) { throw new Error(f.name + '：不是正確的原稿檔（請選 Claude 給的 lessonNN.plain.json，不要選加密檔或圖片）'); }
           if (!lesson || typeof lesson.id !== 'string') throw new Error(f.name + '：不是課文原稿（找不到課次）');
@@ -57,7 +90,10 @@
             return { name: 'lesson' + lesson.id.slice(1) + '.enc.js', text: H3A.cryptobox.toEncFile(lesson.id, box) };
           });
         });
-      })).then(function (out) {
+        }));
+      }).then(function (out) {
+        var seenIds = {};
+        out.forEach(function (o) { if (seenIds[o.name]) throw new Error('選到兩個同一課的原稿（' + o.name.replace('.enc.js', '') + '），請只留一個'); seenIds[o.name] = 1; });
         out.sort(function (a, b) { return a.name < b.name ? -1 : 1; });
         if (out.length === 1) {
           download(new Blob([out[0].text], { type: 'text/javascript' }), out[0].name);
@@ -69,7 +105,7 @@
       }).catch(function (err) { msg.textContent = err.message; }).then(function () { btn.disabled = false; });
     } },
       h('h2', {}, '🔐 課文加密工具'),
-      h('p', {}, '1. 選擇 Claude 給您的原稿檔（可以一次選 12 課）'), file,
+      h('p', {}, '1. 選擇 Claude 給您的原稿檔（可以一次選 12 課，也可以直接選雲端下載的 zip）'), file,
       h('p', {}, '2. 設定教室密碼（學生和家長第一次使用時要輸入）'), pw1, pw2,
       h('p', { class: 'small' }, '加密只在這台裝置上進行，密碼和原稿都不會上傳。請記住密碼，Claude 也不知道這個密碼。'),
       btn, msg, ok));
