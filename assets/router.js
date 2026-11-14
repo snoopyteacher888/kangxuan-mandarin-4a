@@ -53,12 +53,18 @@
       H3A.pages.home(shell({ title: '康軒國語四上', brand: true }), { go: go, settings: settings }); return; }
     if (p[0] === 'who') { whoPage(function () { go('#/'); }); return; }
     if (p[0] === 'worksheet') {
-      H3A.pages.worksheet(shell({ back: '#/', title: '學習單印製' }), { go: go, settings: settings, params: { l: p[1] } }); return; }
+      var wsMain = shell({ back: '#/', title: '學習單印製' });
+      wsMain.appendChild(h('p', { class: 'notice loading-note' }, '載入中……'));
+      H3A.data.allWords().then(function () { if (my !== renderToken) return; H3A.ui.clear(wsMain); H3A.pages.worksheet(wsMain, { go: go, settings: settings, params: { l: p[1] } }); }); return; }
     if (p[0] === 'settings' || p[0] === 'teacher') {
       var name = p[0] === 'teacher' && p[1] === 'encrypt' ? 'encrypt' : p[0];
       if (!H3A.pages[name]) { go('#/'); return; }
-      H3A.pages[name](shell({ back: '#/', title: name === 'teacher' ? '老師後台' : name === 'encrypt' ? '加密工具' : '老師設定' }),
-        { go: go, settings: settings, params: parsed.params });
+      var tMain = shell({ back: '#/', title: name === 'teacher' ? '老師後台' : name === 'encrypt' ? '加密工具' : '老師設定' });
+      /* 老師後台要用到每一課的字詞資料；設定頁不用 */
+      (name === 'teacher' ? H3A.data.allWords() : Promise.resolve()).then(function () {
+        if (my !== renderToken) return;
+        H3A.pages[name](tMain, { go: go, settings: settings, params: parsed.params });
+      });
       return;
     }
     var meta = lessonMeta(p[0]);
@@ -75,8 +81,10 @@
       return;
     }
     var main = shell({ back: back, title: titleText, titleSay: true, student: H3A.session.studentInfo(who.student) });
-    var words = (root.H3A_WORDS && root.H3A_WORDS[meta.id]) || null;
     var noKey = NO_KEY.indexOf(activity) >= 0;
+    /* 這一課的字詞資料點進來才下載（加快速度） */
+    H3A.data.words(meta.id).then(function (words) {
+    if (my !== renderToken) return;
     H3A.session.getLesson(meta.id).catch(function (err) {
       if (noKey) return null;
       throw err;
@@ -92,6 +100,7 @@
       if (my !== renderToken) return;
       if (err.message === 'NEED_KEY') H3A.pages.unlock(main, { lessonId: meta.id, onUnlocked: render });
       else main.appendChild(h('p', { class: 'notice' }, '這一課的資料還沒放上來，請告訴老師。'));
+    });
     });
   }
 

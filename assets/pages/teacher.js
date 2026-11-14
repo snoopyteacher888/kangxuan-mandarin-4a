@@ -33,16 +33,17 @@
 
   function login(main, ctx) {
     H3A.ui.clear(main);
+    if (H3A.data) H3A.data.warmBackend(); /* 先叫醒後台，打完密碼就比較快 */
     var input = h('input', { type: 'password', class: 'big-input', autocomplete: 'current-password', 'aria-label': '老師密碼' });
     var msg = h('p', { class: 'error', role: 'alert' });
     var btn = h('button', { type: 'submit', class: 'btn-primary' }, '登入');
     main.appendChild(h('form', { class: 'unlock', onsubmit: function (e) {
-      e.preventDefault(); btn.disabled = true; msg.textContent = '';
+      e.preventDefault(); btn.disabled = true; btn.textContent = '確認中…'; msg.textContent = '';
       H3A.api.call('login', { password: input.value }).then(function (res) {
-        btn.disabled = false;
+        btn.disabled = false; btn.textContent = '登入';
         if (res.token) { setToken(res.token); dashboard(main, ctx); return; }
         msg.textContent = res.error === 'LOCKED' ? '輸錯太多次，請 15 分鐘後再試' : res.error === 'NO_PASSWORD_SET' ? '後台還沒設定老師密碼' : '密碼不對';
-      }, function () { btn.disabled = false; msg.textContent = '無法連線，請檢查網路'; });
+      }, function () { btn.disabled = false; btn.textContent = '登入'; msg.textContent = '無法連線，請檢查網路'; });
     } }, h('h2', {}, '📊 老師後台'), input, btn, msg));
     input.focus();
   }

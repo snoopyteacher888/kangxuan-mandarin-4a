@@ -24,18 +24,19 @@
     main.appendChild(box);
     function askClass() {
       H3A.ui.clear(box);
+      if (H3A.data) H3A.data.warmBackend(); /* 先叫醒後台，打完密碼就比較快 */
       var input = h('input', { type: 'password', class: 'big-input', autocomplete: 'current-password', 'aria-label': '老師密碼' });
       var msg = h('p', { class: 'error', role: 'alert' });
       var btn = h('button', { type: 'submit', class: 'btn-primary' }, '確定');
       box.appendChild(h('form', { class: 'unlock class-pass', onsubmit: function (e) {
         e.preventDefault();
         if (!input.value) return;
-        btn.disabled = true; msg.textContent = '';
+        btn.disabled = true; btn.textContent = '確認中…'; msg.textContent = '';
         H3A.api.call('login', { password: input.value }).then(function (res) {
-          btn.disabled = false;
+          btn.disabled = false; btn.textContent = '確定';
           if (res && res.token) ctx.onPick('class');
           else { input.value = ''; msg.textContent = '密碼不對，全班模式要請老師輸入'; }
-        }, function () { btn.disabled = false; msg.textContent = '無法連線，請檢查網路'; });
+        }, function () { btn.disabled = false; btn.textContent = '確定'; msg.textContent = '無法連線，請檢查網路'; });
       } }, h('h2', {}, '🔒 全班模式要輸入老師密碼'), input, btn, msg));
       input.focus();
     }
