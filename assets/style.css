@@ -1134,3 +1134,11 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .sw-word { font-size: 1.3em; font-weight: 700; }
 .sw-mean { color: #555; }
 .sw-example { font-size: 1.1em; }
+
+/* 2～3 張圖排成一列（三個場景、動作的句子），每張左上角標 1、2、3 */
+.pic.pic-seq { display: flex; gap: 4px; width: auto; aspect-ratio: auto; background: none; }
+.pic-seq-item { position: relative; flex: 1 1 0; min-width: 0; }
+.pic-seq-item img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: 8px; display: block; }
+.pic-seq-no { position: absolute; left: 3px; top: 3px; width: 1.4em; height: 1.4em; line-height: 1.4em; text-align: center; border-radius: 50%; background: #E07B2E; color: #fff; font-size: .75em; font-weight: 700; }
+.prompt-img .pic.pic-seq { width: min(420px, 80vw); height: auto; }
+.learn-box .prompt-img:has(.pic-seq) { width: auto; }

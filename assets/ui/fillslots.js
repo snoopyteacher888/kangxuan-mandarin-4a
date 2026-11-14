@@ -4,10 +4,15 @@
   var H3A = root.H3A; var h = H3A.ui.h;
   function fillQuestion(box, ctx, q, done, feedback) {
     var bad = 0, finished = false, wrongs = [], slots = [], left = 0;
-    var parts = q.segs.map(function (s) {
+    /* 列舉的格子可以互換（老師要求）：早餐有（牛奶），有（麵包），還有（荷包蛋）三格任一個位置都算對；
+       同一組＝緊接在同一類關聯詞（有／還有、又、一邊、一會兒、有時、有的／還有的、有人）後面的格子，至少兩格才成組 */
+    var FAMILY = { '有': 'you', '還有': 'you', '又': 'you2', '一邊': 'yibian', '一會兒': 'yihuier', '有時': 'youshi', '有的': 'youde', '還有的': 'youde', '有人': 'youren' };
+    var groupOf = q.segs.map(function (s, i) { var p = q.segs[i - 1]; return s.kind === 'blank' && p && p.kind === 'conj' && FAMILY[p.text] ? FAMILY[p.text] : ''; });
+    var groupSize = {}; groupOf.forEach(function (g) { if (g) groupSize[g] = (groupSize[g] || 0) + 1; });
+    var parts = q.segs.map(function (s, i) {
       if (s.kind === 'conj') return h('span', { class: 'conj-word fill-conj' }, s.text);
       if (s.kind === 'punct') return h('span', { class: 'fill-punct' }, s.text);
-      var slot = h('span', { class: 'drop-slot fill-slot role-' + (s.role || 'cond'), 'data-answer': s.text });
+      var slot = h('span', { class: 'drop-slot fill-slot role-' + (s.role || 'cond'), 'data-answer': s.text, 'data-group': groupSize[groupOf[i]] > 1 ? groupOf[i] : '' });
       slots.push(slot); left++;
       /* 每一格下面寫要放什麼樣的詞（老師要求） */
       return s.label ? h('span', { class: 'slot-wrap' }, slot, h('span', { class: 'slot-label' }, s.label)) : slot;
@@ -43,9 +48,20 @@
       tile.disabled = true; tile.classList.add('used');
       left--;
     }
+    /* 放進同一組的別的格子：跟原本該放這一塊的格子交換答案 */
+    function swapInto(tile, slot) {
+      var g = slot.getAttribute('data-group'), t = tile.getAttribute('data-text');
+      if (!g) return false;
+      var other = slots.filter(function (x) { return x !== slot && !x.classList.contains('filled') && x.getAttribute('data-group') === g && x.getAttribute('data-answer') === t; })[0];
+      if (!other) return false;
+      other.setAttribute('data-answer', slot.getAttribute('data-answer')); slot.setAttribute('data-answer', t);
+      return true;
+    }
+    /* 學生排出來的整句（互換過的位置照學生放的念） */
+    function built() { var k = 0; return q.segs.map(function (s) { return s.kind === 'blank' ? slots[k++].getAttribute('data-answer') : s.text; }).join(''); }
     function drop(tile, slot) {
       if (finished || tile.disabled) return;
-      if (slot.getAttribute('data-answer') === tile.getAttribute('data-text')) {
+      if (slot.getAttribute('data-answer') === tile.getAttribute('data-text') || swapInto(tile, slot)) {
         put(tile, slot); H3A.sfx.correct(); H3A.ui.clear(feedback); feedback.className = 'feedback';
         H3A.tts.speak(tile.getAttribute('data-text'));
         if (!left) win();
@@ -57,7 +73,7 @@
     }
     function win() {
       finished = true; bulb.remove();
-      H3A.ui.celebrate(feedback, q.full, null, null);
+      H3A.ui.celebrate(feedback, built(), null, null);
       done(bad === 0 ? 'first' : bad === 1 ? 'hint1' : 'hint2', wrongs);
     }
     function climb(asked, tile) {

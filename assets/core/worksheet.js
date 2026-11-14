@@ -9,6 +9,7 @@
     { key: 'zhuyin', title: '國字注音', need: 'hanzi' },
     { key: 'makeword', title: '造詞', need: 'hanzi' },
     { key: 'vocab', title: '語詞填空', need: 'vocab' },
+    { key: 'sentence', title: '語詞造句', need: 'vocab' },
     { key: 'similar', title: '形近字選選看', need: 'similar' },
     { key: 'fix', title: '改錯字', need: 'fix' },
     { key: 'idiom', title: '成語填空', need: 'idioms' },
@@ -18,7 +19,7 @@
     { key: 'reading', title: '課文閱讀理解', need: 'lesson' }
   ];
   var NUM = ['①', '②', '③', '④', '⑤', '⑥'];
-  var MAX = { reading: 8, makeword: 8, zhuyin: 10, vocab: 10, similar: 8, fix: 8, idiom: 5, phrase: 5, phraseMake: 2, pattern: 6, rhetoric: 6 };
+  var MAX = { reading: 8, makeword: 8, zhuyin: 10, vocab: 10, similar: 8, fix: 8, idiom: 5, phrase: 5, phraseMake: 2, sentence: 3, pattern: 6, rhetoric: 6 };
 
   function has(words, key, lesson) {
     if (key === 'lesson') return !!(lesson && lesson.quiz && lesson.quiz.length);
@@ -40,7 +41,7 @@
   function paren(text) { return text.replace(/＿+/g, '（　　　　）'); }
   function take(list, n, r) { return quizgen.shuffle(list, r).slice(0, n); }
   /* 分組（老師要求）：高組＝原本的樣子；中組＝選詞改五選一、選擇題圈出關鍵字；低組＝三選一、附圖片（黑白印）、題數少一點、有提示 */
-  var LEVEL = 'high', LESSON_ID = '';
+  var LEVEL = 'high', LESSON_ID = '', USED_VOCAB = [];
   function n(key) { return LEVEL === 'low' ? Math.max(3, Math.ceil(MAX[key] * 0.6)) : MAX[key]; }
   function img(file) { return file && LESSON_ID ? 'images/' + LESSON_ID + '/' + file : null; }
   function uniq(list) { var seen = {}; return list.filter(function (x) { if (!x || seen[x]) return false; seen[x] = 1; return true; }); }
@@ -77,9 +78,25 @@
     vocab: function (w, r) {
       var list = take(w.vocab.filter(function (v) { return v.example && v.example.indexOf('＿') >= 0; }), n('vocab'), r);
       var all = w.vocab.map(function (v) { return v.word; });
+      USED_VOCAB = list.map(function (v) { return v.word; });
       return { title: '語詞填空', say: '從語詞盒裡選出適當的語詞，寫在句子裡。', sayPick: '圈出正確的語詞，寫在括號裡。',
         bank: quizgen.shuffle(list.map(function (v) { return v.word; }), r),
         items: list.map(function (v) { return { q: paren(v.example), a: v.word, img: img(v.img), fill: { ans: v.word, pool: uniq((v.options || []).concat(all)) } }; }) };
+    },
+    /* 語詞造句（老師要求）：高組自己造三句；中組一句給前半句、一句自己造；低組兩句都給前半句＋圖。
+       不用「語詞填空」已經出過的語詞，免得前半句跟填空題一樣 */
+    sentence: function (w, r) {
+      var ok = w.vocab.filter(function (v) { return v.word && v.example && /＿/.test(v.example); });
+      var fresh = ok.filter(function (v) { return USED_VOCAB.indexOf(v.word) < 0; });
+      var k = LEVEL === 'high' ? MAX.sentence : 2;
+      var list = take(fresh.length >= k ? fresh : ok, k, r);
+      return { title: '語詞造句', say: LEVEL === 'high' ? '用語詞寫一個完整的句子。' : '用語詞把句子寫完整。',
+        items: list.map(function (v, i) {
+          var model = v.example.replace(/＿+/, v.word), at = v.example.search(/＿/);
+          var front = LEVEL !== 'high' && (LEVEL === 'low' || i === 0) && at >= 2 ? v.example.slice(0, at) : '';
+          return front ? { q: '用「' + v.word + '」把句子寫完：' + front + '＿＿＿＿＿＿＿＿＿＿', a: model, line: true, img: img(v.img) }
+            : { q: '用「' + v.word + '」寫一個句子：＿＿＿＿＿＿＿＿＿＿＿＿＿＿', a: '參考：' + model, line: true, img: img(v.img) };
+        }) };
     },
     similar: function (w, r) {
       return { title: '形近字選選看', say: '圈出括號裡正確的字。',
@@ -226,7 +243,7 @@
   function build(words, keys, seed, lesson, opts) {
     var r = quizgen.rng(seed || 1);
     LEVEL = opts && opts.level === 'mid' ? 'mid' : opts && opts.level === 'low' ? 'low' : 'high';
-    LESSON_ID = (opts && opts.lessonId) || '';
+    LESSON_ID = (opts && opts.lessonId) || ''; USED_VOCAB = [];
     return available(words, lesson).filter(function (s) { return keys.indexOf(s.key) >= 0; })
       .map(function (s) { var sec = adapt(MAKE[s.key](words, r, lesson, opts), r); sec.key = s.key; return sec; })
       .filter(function (sec) { return sec.items.length > 0; });

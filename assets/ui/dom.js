@@ -23,7 +23,31 @@
   }
   function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
   /* 圖片：載入失敗時換成灰色框加文字 */
+  /* 三個場景、動作的句子（有時…有時…有時、先…接著…最後、有的…有的…有的、除了…還…甚至）用 2～3 張圖（老師要求）。
+     圖的對照寫在字詞資料的 multiImg：{ 原本的圖: [第一張, 第二張, 第三張] }；有一張還沒上傳就先用原本那一張 */
+  function seqFiles(lessonId, file) {
+    var w = root.H3A_WORDS && root.H3A_WORDS[lessonId];
+    var list = w && w.multiImg && w.multiImg[file];
+    return list && list.length > 1 ? list : null;
+  }
   function picture(lessonId, file, label) {
+    var seq = seqFiles(lessonId, file);
+    if (seq) {
+      var strip = h('div', { class: 'pic pic-seq' }), bad = false;
+      seq.forEach(function (f, i) {
+        var one = h('img', { src: 'images/' + lessonId + '/' + f, alt: label ? label + '（' + (i + 1) + '）' : '', draggable: 'false' });
+        one.onerror = function () {
+          if (bad) return; bad = true;
+          var single = picture1(lessonId, file, label);
+          if (strip.parentNode) strip.parentNode.replaceChild(single, strip);
+        };
+        strip.appendChild(h('span', { class: 'pic-seq-item' }, one, h('span', { class: 'pic-seq-no' }, String(i + 1))));
+      });
+      return strip;
+    }
+    return picture1(lessonId, file, label);
+  }
+  function picture1(lessonId, file, label) {
     var box = h('div', { class: 'pic' });
     if (!file) { box.classList.add('pic-missing'); box.appendChild(h('span', { text: label })); return box; }
     var img = h('img', { src: 'images/' + lessonId + '/' + file, alt: label, draggable: 'false' });

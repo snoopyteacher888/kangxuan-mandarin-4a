@@ -2,6 +2,12 @@
    生字、語詞：options 的第一個是正確答案（作答時會打亂）。 */
 (function (root) {
   var d = {
+    /* 三個場景、動作的句子用三張圖（老師要求）：原本的圖 → 第一、二、三張（還沒上傳就先用原本那一張） */
+    multiImg: {
+      'pt-dad-commute.png': ['pt-dad-commute-1.png', 'pt-dad-commute-2.png', 'pt-dad-commute-3.png'],
+      'pt-cat-sleep.png': ['pt-cat-sleep-1.png', 'pt-cat-sleep-2.png', 'pt-cat-sleep-3.png'],
+      'pt-breakfast.png': ['pt-breakfast-1.png', 'pt-breakfast-2.png', 'pt-breakfast-3.png']
+    },
     /* 人事時地物：選項第一個是答案；paras 是提示要用到的段落 */
     wh: [
       { id: 'wh-ren', key: '人', options: ['作者、姐姐和好朋友們', '作者和學校的老師', '作者和公園的警察', '作者和隔壁的爺爺'], paras: [2, 3, 4], why: '這一課寫的是作者，還有一起看報紙的姐姐、一起吃點心和玩遊戲的好朋友。' },
