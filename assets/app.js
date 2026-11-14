@@ -57,11 +57,20 @@
       };
     }
     H3A.api.flush();
-    /* 先等名冊（最多 2.5 秒），才能判斷連結裡的學生代號還在不在 */
+    /* 名冊：這台裝置存過名冊就直接開始，名冊在背景更新（老師回報：進到「你是誰？」要等 3 秒以上）。
+       只有第一次用（沒有存過名冊）或連結裡的學生代號不在存過的名冊裡，才等後台（最多 2.5 秒） */
     var started = false;
     var go = function () { if (!started) { started = true; H3A.router.start(); } };
-    H3A.session.refreshRoster().then(go, go);
-    setTimeout(go, 2500);
+    var cached = H3A.session.roster(), before = JSON.stringify(cached);
+    var sid = (H3A.links.parseHash(root.location.hash).params || {}).s;
+    var mustWait = !cached.length || (sid && sid !== 'class' && sid !== 'guest' && !cached.some(function (r) { return r.id === sid; }));
+    var refresh = H3A.session.refreshRoster();
+    if (mustWait) { refresh.then(go, go); setTimeout(go, 2500); return; }
+    go();
+    /* 名冊有變（例如老師剛新增學生），而且正停在選頭像的畫面，就重畫一次 */
+    refresh.then(function (list) {
+      if (JSON.stringify(list) !== before && document.querySelector('.picker-grid')) H3A.router.render();
+    }, function () {});
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })(this);
