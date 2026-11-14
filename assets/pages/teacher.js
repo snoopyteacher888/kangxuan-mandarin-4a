@@ -55,7 +55,7 @@
     });
     var fStu = h('select', { class: 'big-select', 'aria-label': '學生' }, h('option', { value: '' }, '全部學生'));
     var fAct = h('select', { class: 'big-select', 'aria-label': '活動' }, h('option', { value: '' }, '全部活動'),
-      ['read', 'map', 'quiz', 'review', 'test', 'hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'challenge', 'idiom'].map(function (a) { return h('option', { value: a }, H3A.pages.activityTitle(a)); }));
+      ['read', 'map', 'quiz', 'review', 'test', 'hanzi', 'vocab', 'charword', 'sentence', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'challenge', 'idiom'].map(function (a) { return h('option', { value: a }, H3A.pages.activityTitle(a)); }));
     var fRange = h('select', { class: 'big-select', 'aria-label': '日期' },
       h('option', { value: 'week' }, '最近 7 天'), h('option', { value: 'today' }, '今天'), h('option', { value: 'all' }, '全部'));
     var gradeBox = h('div', { class: 'panel grade-panel' });

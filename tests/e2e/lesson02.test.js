@@ -48,13 +48,13 @@ test('第 2 課課次頁：有字詞活動和句型', async () => {
   const p = await page(); await p.goto(BASE + '#/L02?s=bear');
   await p.waitForSelector('[data-activity="hanzi"]');
   const acts = await p.$$eval('[data-activity]', x => x.map(e => e.dataset.activity));
-  ['hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom'].forEach(a => assert.ok(acts.includes(a), a));
+  ['hanzi', 'vocab', 'sentence', 'similar', 'listen', 'phrase', 'pattern', 'rhetoric', 'idiom'].forEach(a => assert.ok(acts.includes(a), a));
   assert.deepEqual(p.errors, []);
 });
 
 test('第 2 課每個字詞活動的第一個畫面都正常', async () => {
   const p = await page();
-  for (const a of ['hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'rhetoric', 'idiom', 'hanzi?step=pick', 'hanzi?step=fix', 'vocab?step=picmatch', 'vocab?step=memory', 'charword?step=meaning', 'idiom?step=situation', 'phrase?step=intro2', 'phrase?step=pick2', 'phrase?step=fill2', 'rhetoric?p=question', 'rhetoric?p=personify', 'pattern', 'pattern?p=youshi', 'pattern?p=yibian2&step=fill', 'pattern?p=buguan&step=whole', 'pattern?p=bulun&step=match']) {
+  for (const a of ['hanzi', 'vocab', 'charword', 'similar', 'listen', 'phrase', 'rhetoric', 'idiom', 'hanzi?step=pick', 'hanzi?step=fix', 'vocab?step=picmatch', 'vocab?step=memory', 'charword?step=meaning', 'sentence', 'sentence?step=say', 'idiom?step=situation', 'phrase?step=intro2', 'phrase?step=pick2', 'phrase?step=fill2', 'rhetoric?p=question', 'rhetoric?p=personify', 'pattern', 'pattern?p=youshi', 'pattern?p=yibian2&step=fill', 'pattern?p=buguan&step=whole', 'pattern?p=bulun&step=match']) {
     await p.goto(BASE + '#/L02/' + a + (a.includes('?') ? '&' : '?') + 's=bear');
     await p.waitForSelector('main .prompt, main h2, main .mem-card', { timeout: 5000 });
     assert.equal(await p.$('.notice'), null, a + ' 顯示「還沒準備好」');

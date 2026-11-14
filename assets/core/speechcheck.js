@@ -36,7 +36,8 @@
     }
     if (rule.kind === 'word') {
       if (t.indexOf(rule.word) < 0) return bad('word');
-      return t.length >= (rule.min || 6) ? { status: 'pending', reason: null } : bad('short');
+      /* 有給前半句（用語詞造句的鷹架）時，前半句加上說的話一起算長度 */
+      return (normalize(rule.front || '') + t).length >= (rule.min || 6) ? { status: 'pending', reason: null } : bad('short');
     }
     if (rule.kind === 'pattern') return pattern(PATTERNS[rule.key], normalize(rule.front) + t);
     /* 自由回答（說說你的想法）：電腦判斷不了對錯，夠長就交給老師批改 */

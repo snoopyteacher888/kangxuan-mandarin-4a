@@ -1123,3 +1123,14 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .lesson-card .fb-badge.redo { background: #FDE2D0; color: #9A3D0F; margin-left: 4px; }
 .redo-section .menu-title { color: #B5651D; }
 .redo-tip { text-align: center; }
+
+/* 用語詞造句：看例句卡 */
+.sw-cards { display: grid; gap: 12px; width: 100%; }
+.sw-card { display: flex; gap: 12px; align-items: center; background: #fff; border: 2px solid #E3D9C8; border-radius: 14px; padding: 10px 14px; }
+.sw-pic { flex: 0 0 84px; width: 84px; height: 84px; }
+.sw-pic img { width: 100%; height: 100%; object-fit: contain; }
+.sw-body { flex: 1; min-width: 0; }
+.sw-body p { margin: 2px 0; }
+.sw-word { font-size: 1.3em; font-weight: 700; }
+.sw-mean { color: #555; }
+.sw-example { font-size: 1.1em; }
