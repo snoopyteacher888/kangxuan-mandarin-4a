@@ -113,16 +113,18 @@
         teach: { text: '答案是「' + it.idiom + '」。意思是：' + it.meaning } } };
   }
   /* 有 frame（例如「真＿糕」）時，選項是整個詞（真糟糕／真槽糕／真遭糕），不一樣的那個字標顏色 */
+  /* 形近字配圖（老師要求：用圖記住字，例如山坡上有泥土，就不會選到水部的「波」）：images/LNN/sim-<id>.png；圖還沒上傳就不顯示 */
+  function simImg(s) { return s.img || ('sim-' + s.id + '.png'); }
   function similarQuestion(s, r) {
     var x = s.frame ? framed(s, r) : shuffled(s.options, s.answer, r, { big: true });
-    return { id: s.id, prompt: s.sentence, say: blankSay(s.sentence), options: x.options, answer: x.answer, optionsClass: s.frame ? 'frame-opts' : undefined,
+    return { id: s.id, prompt: s.sentence, say: blankSay(s.sentence), img: simImg(s), options: x.options, answer: x.answer, optionsClass: s.frame ? 'frame-opts' : undefined,
       hints: { h1: s.meaning ? { text: '提示：' + s.meaning, say: '提示：' + s.meaning.replace(/＿/g, '什麼') } : { text: '再讀一次句子，想想這個詞是什麼意思。', say: blankSay(s.sentence) }, h2: { text: s.clue }, teach: { text: s.explain } } };
   }
   /* 形近字第一關：只看語詞（例如「大＿」），把正確的字放進去。答錯先給語詞的意思，再給字形的線索（老師要求：先練語詞，再練句子） */
   function similarWordQuestion(s, r) {
     var x = shuffled(s.options, s.answer, r, { big: true });
     var meaning = (s.meaning || '').replace(/^「[^」]*」/, '這個語詞');
-    return { id: 'sw-' + s.id, prompt: s.frame, say: blankSay(s.frame), options: x.options, answer: x.answer,
+    return { id: 'sw-' + s.id, prompt: s.frame, say: blankSay(s.frame), img: simImg(s), options: x.options, answer: x.answer,
       hints: { h1: { text: '提示：' + meaning }, h2: { text: '提示：' + meaning + s.clue.replace(/^提示：/, '') }, teach: { text: s.explain } } };
   }
   function listenQuestion(l, r) {
