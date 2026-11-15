@@ -114,16 +114,22 @@
   function vertify(sheet) {
     Array.prototype.forEach.call(sheet.querySelectorAll('ol.ws-items'), function (ol) {
       Array.prototype.forEach.call(ol.children, function (li, i) {
-        li.insertBefore(h('span', { class: 'ws-qno' }, h('span', { class: 'ws-tcy' }, String(i + 1)), '．'), li.firstChild);
+        /* 題號直立、不加點（老師要求：點很礙眼），跟題目接在同一行 */
+        li.insertBefore(h('span', { class: 'ws-qno' }, h('span', { class: 'ws-tcy' }, String(i + 1))), li.firstChild);
       });
     });
     (function walk(n) {
       if (n.nodeType === 3) {
-        if (!/＿{2,}/.test(n.nodeValue)) return;
+        /* 直排的冒號換成直式「︰」才會置中 */
+        if (/：/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/：/g, '︰');
+        if (!/＿{2,}|（[　 ]*）/.test(n.nodeValue)) return;
         var frag = document.createDocumentFragment();
-        n.nodeValue.split(/(＿{2,})/).forEach(function (t) {
+        n.nodeValue.split(/(＿{2,}|（[　 ]*）)/).forEach(function (t) {
           if (!t) return;
-          frag.appendChild(/^＿+$/.test(t) ? h('span', { class: 'ws-vline', style: 'inline-size:' + Math.min(14, t.length * 0.9) + 'em' }) : document.createTextNode(t));
+          /* 書寫線改實線；空括號加大（老師要求） */
+          if (/^＿+$/.test(t)) frag.appendChild(h('span', { class: 'ws-vline', style: 'inline-size:' + Math.min(14, t.length * 0.9) + 'em' }));
+          else if (/^（/.test(t)) frag.appendChild(h('span', { class: 'ws-vparen' }, '（', h('span', { class: 'ws-vparen-in', style: 'inline-size:' + Math.max(3, (t.length - 2) * 1.1) + 'em' }), '）'));
+          else frag.appendChild(document.createTextNode(t));
         });
         n.parentNode.replaceChild(frag, n);
         return;
