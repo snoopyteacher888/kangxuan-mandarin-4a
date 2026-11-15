@@ -130,7 +130,7 @@
         var at = full.indexOf(ans);
         /* 低組：紙上沒有彩圖，附上提示，才知道要填哪一個；中組不給提示，除非題目本身沒有線索（例如「（　）的時候」） */
         var rest = full.replace(ans, ''), bare = !rest || (full.indexOf(ans) === 0 && rest.charAt(0) === '的' && rest.length <= 3);
-        var hint = LEVEL === 'low' || bare ? String(x.clue || '').replace(/^提示：/, '') : '';
+        var hint = ''; /* 學習單不放提示（老師要求） */
         return { q: full.slice(0, at) + '（　　　）' + full.slice(at + ans.length) + (hint ? '　（' + hint.replace(/[。！]$/, '') + '）' : ''), a: full, ans: ans,
           img: img(x.img), pool: x.options };
       });
@@ -233,7 +233,8 @@
       delete it.fill;
       if (LEVEL === 'high' || !it.marks || !it.marks.length) delete it.marks;
       if (LEVEL !== 'low' || !it.img) delete it.img;
-      if (!(LEVEL === 'low' || (LEVEL === 'mid' && it.hintMid)) || !it.hint) delete it.hint;
+      /* 學習單不放提示（老師要求：對閱讀困難的學生是累贅） */
+      delete it.hint;
       delete it.hintMid;
     });
     if (pick) { sec.bank = null; if (sec.sayPick) sec.say = sec.sayPick; }

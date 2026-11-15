@@ -113,11 +113,14 @@
   /* 直書排版：題號改成直立的「１．」（兩位數併成一格），連續的＿換成直的書寫線 */
   function vertify(sheet) {
     Array.prototype.forEach.call(sheet.querySelectorAll('ol.ws-items'), function (ol) {
-      /* 低組的圖：直書時從題目裡拿出來，放在題目後面自成一欄（放在題目裡會把題目擠歪） */
+      /* 低組的圖：直書時放在句子的最下方（老師要求），選項另起一行 */
       Array.prototype.slice.call(ol.children).forEach(function (li) {
         var im = li.querySelector(':scope > img.ws-img'); if (!im) return;
-        li.classList.remove('ws-has-img'); im.remove();
-        li.parentNode.insertBefore(h('div', { class: 'ws-vimg' }, im), li.nextSibling);
+        li.classList.remove('ws-has-img'); im.remove(); im.className = 'ws-img ws-img-in';
+        var body = li.querySelector(':scope > .ws-body');
+        if (!body) { li.appendChild(im); return; }
+        var block = Array.prototype.filter.call(body.children, function (c) { return c.tagName === 'DIV'; })[0];
+        body.insertBefore(im, block || null);
       });
       Array.prototype.filter.call(ol.children, function (x) { return x.tagName === 'LI'; }).forEach(function (li, i) {
         /* 題號直立、不加點（老師要求：點很礙眼），跟題目接在同一行 */

@@ -1192,3 +1192,4 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vpage .ws-vband-low { border-top: 1px solid #000; padding-top: .4em; }
 .ws-vert .ws-vpage .ws-vprobe { position: absolute; visibility: hidden; }
 .ws-vert .ws-vpage .ws-vparen { display: inline-block; white-space: nowrap; }
+.ws-vert .ws-vpage img.ws-img-in { float: none; display: inline-block; width: 2.2cm; height: 2.2cm; margin: .3em 0 0; vertical-align: top; }
