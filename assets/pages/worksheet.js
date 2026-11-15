@@ -47,11 +47,17 @@
     var g = gradeName();
     return (g ? g + '　' : '') + '第 ' + parseInt(meta.id.slice(1), 10) + ' 課　' + meta.title + '　學輔班學習單';
   }
+  /* 標題：課名維持原本大小，年級、第幾課、學輔班學習單縮小，加注音時才不會擠到第二行（老師要求） */
+  function titleNode(meta, tail) {
+    var g = gradeName(), sm = function (t) { return h('span', { class: 'ws-title-sm' }, t); };
+    return h('h1', { class: 'ws-title' }, sm((g ? g + '　' : '') + '第 ' + parseInt(meta.id.slice(1), 10) + ' 課　'),
+      h('span', { class: 'ws-title-main' }, meta.title), sm('　學輔班學習單' + (tail || '')));
+  }
   function paper(meta, sections, opts) {
     var n = parseInt(meta.id.slice(1), 10);
     var sheet = h('div', { class: 'ws-sheet' },
       /* 可以選擇不印標題（老師要求） */
-      opts.title === false ? null : h('h1', { class: 'ws-title' }, titleText(meta)),
+      opts.title === false ? null : titleNode(meta),
       h('div', { class: 'ws-who' }, h('span', {}, '姓名：＿＿＿＿＿＿'), h('span', {}, '日期：＿＿＿＿＿＿')));
     sections.forEach(function (sec, i) {
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
@@ -82,7 +88,7 @@
     });
     var wrap = h('div', { class: 'ws-paper' + (opts.zhuyin ? '' : ' ws-plain') + (opts.land ? ' ws-land' : '') }, sheet);
     if (opts.answers) {
-      var key = h('div', { class: 'ws-sheet ws-answers' }, h('h1', { class: 'ws-title' }, titleText(meta) + '（參考答案）'));
+      var key = h('div', { class: 'ws-sheet ws-answers' }, titleNode(meta, '（參考答案）'));
       sections.forEach(function (sec, i) {
         key.appendChild(h('section', { class: 'ws-sec' }, h('h2', {}, CN[i] + '、' + sec.title),
           h('ol', { class: 'ws-items ws-key' }, sec.items.map(function (it) { return h('li', {}, it.a); }))));
