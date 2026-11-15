@@ -1172,3 +1172,5 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-paper.ws-vert .ws-vpage { font-size: 14pt; line-height: 1.95; }
 .ws-paper .ws-sheet.ws-answers, .ws-paper .ws-sheet.ws-answers * { font-family: var(--font) !important; }
 .ws-vert .ws-vpage .ws-bank { border-style: solid; }
+/* 照樣寫短語表格裡的空括號：直排時也要夠長 */
+.ws-vert .ws-vpage .ws-pin { display: inline-block; min-width: 0; inline-size: 4.5em; block-size: 1em; }
