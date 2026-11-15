@@ -1143,3 +1143,28 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .pic-seq-no { position: absolute; left: 3px; top: 3px; width: 1.4em; height: 1.4em; line-height: 1.4em; text-align: center; border-radius: 50%; background: #E07B2E; color: #fff; font-size: .75em; font-weight: 700; }
 .prompt-img .pic.pic-seq { width: min(420px, 80vw); height: auto; }
 .learn-box .prompt-img:has(.pic-seq) { width: auto; }
+/* 直書學習單（老師要求，像考卷）：整張直排、由右往左；A4 橫印 */
+.ws-paper.ws-vert .ws-sheet:not(.ws-answers) { writing-mode: vertical-rl; max-width: none; line-height: 2.1; }
+.ws-paper.ws-vert .ws-vpages { display: grid; gap: 24px; justify-items: center; }
+.ws-paper.ws-vert .ws-vpage { width: 297mm; height: 210mm; padding: 12mm; box-sizing: border-box; overflow: hidden; }
+.ws-vert .ws-sheet:not(.ws-answers) .ws-items { list-style: none; padding: 0; margin: 0 0 0 .4em; }
+.ws-vert .ws-sheet:not(.ws-answers) .ws-items > li { margin: 0 0 0 .15em; }
+.ws-vert .ws-qno { margin-block-end: .2em; }
+.ws-vert .ws-tcy { text-combine-upright: all; -webkit-text-combine: horizontal; font-family: var(--font) !important; }
+.ws-vert .ws-sec { margin: 0 0 0 .6em; }
+.ws-vert .ws-who { justify-content: flex-start; gap: 3em; }
+.ws-vert .ws-title { text-align: start; margin: 0 0 0 .4em; }
+.ws-vert .ws-img { float: none; display: block; margin: 0 0 4px 0; }
+.ws-vert .ws-vline { display: inline-block; block-size: 1.3em; vertical-align: middle; border-left: 1.5px dotted #000; }
+/* 國字注音的格子：左邊一個方格（寫國字或印國字），右邊一欄注音（印注音或空著寫） */
+.ws-vert .ws-zbox { display: inline-flex; writing-mode: horizontal-tb; flex-direction: row; vertical-align: middle; margin: .15em 0; border: 1.5px solid #000; }
+.ws-vert .ws-zcell { width: 1.5em; height: 1.5em; display: flex; align-items: center; justify-content: center; font-size: 1.15em; line-height: 1; font-family: var(--font) !important; }
+.ws-vert .ws-zcol { width: .8em; min-height: 1.72em; border-left: 1px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .62em; line-height: 1.05; font-family: var(--font) !important; padding: 2px 0; }
+.ws-vert .ws-zcol .ws-ztone { align-self: flex-end; line-height: .6; }
+@media print { .ws-paper.ws-vert .ws-vpages { display: block; } .ws-paper.ws-vert .ws-vpage { width: 273mm; height: 186mm; padding: 0; break-after: page; page-break-after: always; } }
+.ws-vert .ws-vpage .ws-items.ws-wide, .ws-vert .ws-vpage .ws-items.ws-two { display: block; columns: auto; }
+
+/* 學習單勾「印注音」：不管網站有沒有開注音，都用注音字型印（四到六年級網站預設沒開注音時，原本印不出注音） */
+.ws-paper:not(.ws-plain) .ws-sheet { font-family: 'Bpmf Zihi Kai Std', "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; }
+.ws-paper.ws-vert .ws-vpage { font-size: 14pt; line-height: 1.95; }
+.ws-paper .ws-sheet.ws-answers, .ws-paper .ws-sheet.ws-answers * { font-family: var(--font) !important; }
