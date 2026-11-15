@@ -68,7 +68,8 @@
     var sheet = h('div', { class: 'ws-sheet' },
       /* 可以選擇不印標題（老師要求） */
       opts.title === false ? null : titleNode(meta),
-      h('div', { class: 'ws-who' }, h('span', {}, '姓名：＿＿＿＿＿＿'), h('span', {}, '日期：＿＿＿＿＿＿')));
+      /* 直書不放日期（老師要求） */
+      h('div', { class: 'ws-who' }, h('span', {}, '姓名：＿＿＿＿＿＿'), vert ? null : h('span', {}, '日期：＿＿＿＿＿＿')));
     sections.forEach(function (sec, i) {
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
         h('h2', {}, CN[i] + '、' + sec.title), h('p', { class: 'ws-say' }, sec.say));
@@ -159,7 +160,7 @@
        大題接著前一大題往下排，不另起一欄；一題太長就在欄裡換行，不會拆到下一頁 */
     var blocks = [];
     Array.prototype.slice.call(sheet.children).forEach(function (el) {
-      if (el.tagName !== 'SECTION') { blocks.push({ el: el }); return; }
+      if (el.tagName !== 'SECTION') { blocks.push({ el: el, lead: true }); return; }
       var ol = el.querySelector('ol.ws-items'), head = h('div', { class: 'ws-vhead' });
       Array.prototype.slice.call(el.children).forEach(function (c) { if (c !== ol) head.appendChild(c); });
       var sec = { cls: el.className, olCls: ol ? ol.className : 'ws-items' };
@@ -168,9 +169,14 @@
     });
     /* 每頁兩個欄（上欄、下欄），一題一題放：上欄放不下換下欄，下欄放不下換下一頁；一題不會被切成兩半 */
     var pages = [], page, list, cur, bands = [], bi = 0, band;
+    /* 第一頁右邊是整頁高的標題區（像考卷：標題一行、姓名一行，再一條直線），其他是上下兩欄 */
+    var hdr = null;
     function newPage() {
       bands = [h('div', { class: 'ws-vband2' }), h('div', { class: 'ws-vband2 ws-vband2-low' })];
-      var pg = h('div', { class: 'ws-sheet ws-vpage ws-vcols' }, bands);
+      var first = !pages.length;
+      if (first) hdr = h('div', { class: 'ws-vhdr' });
+      var pg = first ? h('div', { class: 'ws-sheet ws-vpage ws-vcols ws-vfirst' }, hdr, h('div', { class: 'ws-vbands' }, bands))
+        : h('div', { class: 'ws-sheet ws-vpage ws-vcols' }, bands);
       holder.appendChild(pg); pages.push(pg); bi = 0; band = bands[0]; page = band; list = null; cur = null;
     }
     function nextBand() { if (bi === 0) { bi = 1; band = bands[1]; page = band; list = null; cur = null; } else newPage(); }
@@ -179,7 +185,8 @@
       if (b.item) {
         if (!list || cur !== b.sec) { list = h('ol', { class: b.sec.olCls }); page.appendChild(h('div', { class: b.sec.cls + ' ws-vsec' }, list)); cur = b.sec; }
         list.appendChild(b.el);
-      } else { page.appendChild(b.el); list = null; cur = null; }
+      } else if (b.lead && hdr) { hdr.appendChild(b.el); }
+      else { page.appendChild(b.el); list = null; cur = null; }
     }
     newPage();
     blocks.forEach(function (b, i) {

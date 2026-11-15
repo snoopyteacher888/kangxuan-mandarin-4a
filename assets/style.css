@@ -1208,3 +1208,13 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vpage .ws-ptable { font-size: .78em; }
 .ws-vert .ws-vpage .ws-pcard { padding: .1em .35em; min-width: 0; }
 .ws-vert .ws-vpage .ws-pin { inline-size: 3.6em; }
+/* 大題標題：比題目大兩號（題目 14pt → 標題 16pt，老師要求） */
+.ws-vert .ws-vpage .ws-vhead h2 { font-size: 16pt; margin: 0 0 0 .2em; line-height: 1.9; }
+/* 第一頁的標題區：右邊整頁高，標題一行、姓名一行，左邊一條直線隔開（像考卷） */
+.ws-paper.ws-vert .ws-sheet.ws-vpage.ws-vcols.ws-vfirst:not(.ws-answers) { flex-direction: row-reverse; }
+.ws-vert .ws-vfirst .ws-vhdr { writing-mode: vertical-rl; flex: none; height: 100%; border-left: 1.5px solid #000; padding-left: 3mm; margin-left: 4mm; }
+.ws-vert .ws-vfirst .ws-vbands { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.ws-vert .ws-vhdr .ws-title { font-size: 1.15em; font-weight: 700; margin: 0 0 0 .5em; text-align: start; }
+.ws-vert .ws-vhdr .ws-title .ws-title-sm { font-size: 1em; font-weight: 700; }
+.ws-vert .ws-vhdr .ws-who { display: block; margin: 0; }
+.ws-vert .ws-vhdr .ws-who .ws-vline { inline-size: 6em !important; }
