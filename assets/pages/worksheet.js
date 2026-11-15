@@ -2,7 +2,7 @@
 (function (root) {
   var H3A = root.H3A; var h = H3A.ui.h;
   H3A.pages = H3A.pages || {};
-  var CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  var CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五'];
 
   function lessonsWithWords() {
     return (root.H3A_LESSONS || []).filter(function (l) { return root.H3A_WORDS && root.H3A_WORDS[l.id]; });
@@ -113,7 +113,13 @@
   /* 直書排版：題號改成直立的「１．」（兩位數併成一格），連續的＿換成直的書寫線 */
   function vertify(sheet) {
     Array.prototype.forEach.call(sheet.querySelectorAll('ol.ws-items'), function (ol) {
-      Array.prototype.forEach.call(ol.children, function (li, i) {
+      /* 低組的圖：直書時從題目裡拿出來，放在題目後面自成一欄（放在題目裡會把題目擠歪） */
+      Array.prototype.slice.call(ol.children).forEach(function (li) {
+        var im = li.querySelector(':scope > img.ws-img'); if (!im) return;
+        li.classList.remove('ws-has-img'); im.remove();
+        li.parentNode.insertBefore(h('div', { class: 'ws-vimg' }, im), li.nextSibling);
+      });
+      Array.prototype.filter.call(ol.children, function (x) { return x.tagName === 'LI'; }).forEach(function (li, i) {
         /* 題號直立、不加點（老師要求：點很礙眼），跟題目接在同一行 */
         li.insertBefore(h('span', { class: 'ws-qno' }, h('span', { class: 'ws-tcy' }, String(i + 1))), li.firstChild);
       });
@@ -146,34 +152,56 @@
   /* 直書分頁：瀏覽器列印直書時頁序會反過來，所以自己分頁。把標題、每一大題的題目說明、每一小題依序放進一頁一頁的直書紙，
      放不下（往左超出紙寬）就換下一頁；同一大題接到下一頁時，題號照原本的接下去 */
   function paginate(sheet, holder) {
-    var blocks = [];
-    Array.prototype.forEach.call(sheet.children, function (el) {
-      if (el.tagName !== 'SECTION') { blocks.push({ el: el }); return; }
-      var head = h('div', { class: el.className });
-      var ol = el.querySelector('ol.ws-items');
+    /* 版面（老師要求充分運用空間）：短的大題兩個一組，上下各放一個（一在上、二在下）；題目比較長的大題才佔整頁高度。
+       一頁排滿（往左超出紙寬）就換下一頁；長的大題接到下一頁時，題號照原本的接下去 */
+    var lead = [], secs = [];
+    Array.prototype.slice.call(sheet.children).forEach(function (el) {
+      if (el.tagName !== 'SECTION') { lead.push(el); return; }
+      var ol = el.querySelector('ol.ws-items'), head = h('div', { class: 'ws-vhead' });
       Array.prototype.slice.call(el.children).forEach(function (c) { if (c !== ol) head.appendChild(c); });
-      blocks.push({ el: head, head: true, cls: ol ? ol.className : '' });
-      if (ol) Array.prototype.slice.call(ol.children).forEach(function (li) { blocks.push({ el: li, li: true, cls: ol.className, sec: el.className }); });
+      secs.push({ cls: el.className, head: head, olCls: ol ? ol.className : 'ws-items', items: ol ? Array.prototype.slice.call(ol.children) : [] });
     });
-    var pages = [], page, list;
-    function newPage() { page = h('div', { class: 'ws-sheet ws-vpage' }); holder.appendChild(page); pages.push(page); list = null; }
+    var pages = [], page;
+    function newPage() { page = h('div', { class: 'ws-sheet ws-vpage' }); holder.appendChild(page); pages.push(page); }
     function over() { return page.scrollWidth > page.clientWidth + 1; }
     newPage();
-    blocks.forEach(function (b) {
-      function put() {
-        if (b.li) {
-          if (!list) { list = h('ol', { class: b.cls }); page.appendChild(h('div', { class: b.sec }, list)); }
-          list.appendChild(b.el);
-        } else { page.appendChild(b.el); list = b.head ? null : list; }
-      }
-      put();
-      if (over() && page.childNodes.length > 1) {
-        b.el.remove();
-        if (list && !list.children.length) list.parentNode.remove();
-        newPage(); put();
-      }
-      if (b.head) list = null;
+    lead.forEach(function (el) { page.appendChild(el); });
+    /* 量每一大題的題目有多長：都放得進半頁高，就算「短的大題」 */
+    var half = page.clientHeight / 2 - 12;
+    secs.forEach(function (sec) {
+      var probe = h('div', { class: 'ws-vprobe' }, h('ol', { class: sec.olCls }, sec.items));
+      page.appendChild(probe);
+      sec.short = sec.items.length > 0 && sec.items.every(function (li) {
+        var r = document.createRange(); r.selectNodeContents(li); return r.getBoundingClientRect().height <= half && li.getClientRects().length <= 1 && li.getBoundingClientRect().width < page.clientHeight / 4;
+      });
+      probe.remove();
     });
+    function secBox(sec, items) { return h('div', { class: sec.cls }, sec.head, h('ol', { class: sec.olCls }, items)); }
+    function placeFull(sec) {
+      var slot = h('div', { class: 'ws-vslot' }), list = h('ol', { class: sec.olCls });
+      page.appendChild(slot); slot.appendChild(h('div', { class: sec.cls }, sec.head, list));
+      if (over() && page.childNodes.length > 1) { slot.remove(); newPage(); page.appendChild(slot); }
+      sec.items.forEach(function (li) {
+        list.appendChild(li);
+        /* 大題的第一題就放不下：整個大題（含題目說明）移到下一頁 */
+        if (over() && list.children.length === 1 && page.childNodes.length > 1) { slot.remove(); newPage(); page.appendChild(slot); return; }
+        if (over() && list.children.length > 1) {
+          li.remove(); newPage();
+          slot = h('div', { class: 'ws-vslot' }); list = h('ol', { class: sec.olCls });
+          slot.appendChild(h('div', { class: sec.cls }, list)); page.appendChild(slot); list.appendChild(li);
+        }
+      });
+    }
+    function placePair(a, b) {
+      var pair = h('div', { class: 'ws-vpair' }, h('div', { class: 'ws-vband' }, secBox(a, a.items)), h('div', { class: 'ws-vband ws-vband-low' }, secBox(b, b.items)));
+      page.appendChild(pair);
+      if (over() && page.childNodes.length > 1) { pair.remove(); newPage(); page.appendChild(pair); }
+      if (over()) { pair.remove(); [a, b].forEach(function (x) { x.head.remove(); }); placeFull(a); placeFull(b); }
+    }
+    for (var i = 0; i < secs.length; i++) {
+      if (secs[i].short && secs[i + 1] && secs[i + 1].short) { placePair(secs[i], secs[i + 1]); i++; }
+      else placeFull(secs[i]);
+    }
     return pages;
   }
   function pageStyle(land) {

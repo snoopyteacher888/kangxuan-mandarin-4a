@@ -1182,3 +1182,13 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vpage li.ws-line .ws-vline { display: block; inline-size: 160mm !important; max-inline-size: none; block-size: 2.8em; margin: 0 .4em; }
 .ws-vert .ws-vpage li.ws-line { margin-left: .8em; }
 .ws-vert .ws-vdots { display: inline-block; block-size: 1em; vertical-align: middle; background: radial-gradient(circle, #000 1.2px, transparent 1.4px) center top / 100% .3em repeat-y; }
+.ws-vert .ws-vpage li.ws-hang > .ws-pre, .ws-vert .ws-vpage li.ws-hang > .ws-qno { flex: none; white-space: nowrap; }
+.ws-vert .ws-vpage li.ws-hang > .ws-body { flex: 1 1 auto; min-inline-size: 0; }
+.ws-vert .ws-vpage .ws-vimg { display: block; margin: 0 .2em 0 .5em; }
+.ws-vert .ws-vpage .ws-vimg .ws-img { float: none; display: block; width: 2.4cm; height: 2.4cm; margin: 0; }
+/* 兩個短的大題上下各一（老師要求一在上、二在下） */
+.ws-vert .ws-vpage .ws-vpair { writing-mode: horizontal-tb; display: flex; flex-direction: column; align-items: flex-end; height: 100%; margin-left: .6em; }
+.ws-vert .ws-vpage .ws-vband { writing-mode: vertical-rl; height: 50%; box-sizing: border-box; }
+.ws-vert .ws-vpage .ws-vband-low { border-top: 1px solid #000; padding-top: .4em; }
+.ws-vert .ws-vpage .ws-vprobe { position: absolute; visibility: hidden; }
+.ws-vert .ws-vpage .ws-vparen { display: inline-block; white-space: nowrap; }
