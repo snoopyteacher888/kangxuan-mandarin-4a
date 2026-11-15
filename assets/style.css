@@ -1193,3 +1193,18 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vpage .ws-vprobe { position: absolute; visibility: hidden; }
 .ws-vert .ws-vpage .ws-vparen { display: inline-block; white-space: nowrap; }
 .ws-vert .ws-vpage img.ws-img-in { float: none; display: inline-block; width: 2.2cm; height: 2.2cm; margin: .3em 0 0; vertical-align: top; }
+/* 考卷式雙欄（老師要求）：上下兩欄，中間一條線 */
+.ws-paper.ws-vert .ws-sheet.ws-vpage.ws-vcols:not(.ws-answers) { writing-mode: horizontal-tb; display: flex; flex-direction: column; }
+.ws-vert .ws-vcols .ws-vband2 { writing-mode: vertical-rl; flex: 0 0 50%; height: 50%; width: 100%; overflow: hidden; box-sizing: border-box; padding-bottom: 3mm; }
+.ws-vert .ws-vcols .ws-vband2-low { border-top: 1px solid #000; padding: 3mm 0 0; }
+.ws-vert .ws-vcols li, .ws-vert .ws-vcols .ws-vhead, .ws-vert .ws-vcols .ws-zbox { break-inside: avoid; }
+.ws-vert .ws-vcols .ws-vhead { break-after: avoid; }
+.ws-vert .ws-vcols .ws-vsec { margin: 0; }
+.ws-vert .ws-vcols li.ws-line .ws-vline { inline-size: 74mm !important; }
+/* 直書時選項照一般文字排，太長就換到下一行，不會超出欄外 */
+.ws-vert .ws-vpage .ws-opts, .ws-vert .ws-vpage .ws-choices { display: block; padding: 0; }
+.ws-vert .ws-vpage .ws-opts > span, .ws-vert .ws-vpage .ws-choices > span { margin-inline-end: 1.2em; }
+/* 照樣寫短語的表格在半頁高的欄裡要放得下 */
+.ws-vert .ws-vpage .ws-ptable { font-size: .78em; }
+.ws-vert .ws-vpage .ws-pcard { padding: .1em .35em; min-width: 0; }
+.ws-vert .ws-vpage .ws-pin { inline-size: 3.6em; }
