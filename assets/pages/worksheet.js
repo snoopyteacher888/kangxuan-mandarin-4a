@@ -41,10 +41,17 @@
     return li;
   }
 
+  /* 標題加上年級（老師要求：同時印不同年級同一課才不會搞混）；年級從網頁標題「國語六上學習樂園」取出 */
+  function gradeName() { var m = /國語(.)上|國語(.)下/.exec(document.title || ''); return m ? (m[1] || m[2]) + '年級' : ''; }
+  function titleText(meta) {
+    var g = gradeName();
+    return (g ? g + '　' : '') + '第 ' + parseInt(meta.id.slice(1), 10) + ' 課　' + meta.title + '　學輔班學習單';
+  }
   function paper(meta, sections, opts) {
     var n = parseInt(meta.id.slice(1), 10);
     var sheet = h('div', { class: 'ws-sheet' },
-      h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學輔班學習單'),
+      /* 可以選擇不印標題（老師要求） */
+      opts.title === false ? null : h('h1', { class: 'ws-title' }, titleText(meta)),
       h('div', { class: 'ws-who' }, h('span', {}, '姓名：＿＿＿＿＿＿'), h('span', {}, '日期：＿＿＿＿＿＿')));
     sections.forEach(function (sec, i) {
       var box = h('section', { class: 'ws-sec ws-' + sec.key },
@@ -75,7 +82,7 @@
     });
     var wrap = h('div', { class: 'ws-paper' + (opts.zhuyin ? '' : ' ws-plain') + (opts.land ? ' ws-land' : '') }, sheet);
     if (opts.answers) {
-      var key = h('div', { class: 'ws-sheet ws-answers' }, h('h1', { class: 'ws-title' }, '第 ' + n + ' 課　' + meta.title + '　學輔班學習單（參考答案）'));
+      var key = h('div', { class: 'ws-sheet ws-answers' }, h('h1', { class: 'ws-title' }, titleText(meta) + '（參考答案）'));
       sections.forEach(function (sec, i) {
         key.appendChild(h('section', { class: 'ws-sec' }, h('h2', {}, CN[i] + '、' + sec.title),
           h('ol', { class: 'ws-items ws-key' }, sec.items.map(function (it) { return h('li', {}, it.a); }))));
@@ -95,7 +102,7 @@
   H3A.pages.worksheet = function (main, ctx) {
     var list = lessonsWithWords();
     if (!list.length) { main.appendChild(h('p', { class: 'notice' }, '還沒有可以印的課次。')); return; }
-    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, land: false, seed: 1, lesson: null, locked: false, level: 'high' };
+    var state = { id: (ctx.params && ctx.params.l) || list[0].id, keys: null, answers: true, zhuyin: false, land: false, seed: 1, lesson: null, locked: false, level: 'high', title: true };
     if (!list.some(function (l) { return l.id === state.id; })) state.id = list[0].id;
     var controls = h('div', { class: 'ws-controls' });
     var preview = h('div', { class: 'ws-preview' });
@@ -116,6 +123,36 @@
         e.preventDefault(); if (!input.value) return;
         H3A.session.unlock(state.id, input.value).then(function () { load(); }, function () { msg.textContent = '密碼不對'; });
       } }, h('span', {}, '🔒 輸入教室密碼，就能加入「課文閱讀理解」：'), input, h('button', { type: 'submit', class: 'btn' }, '解開'), msg);
+    }
+    /* 波波注音（bopodoc.com，老師要求）：它沒有可以直接帶入內容的連結，只能貼上。
+       所以先把學習單（不含答案頁）複製起來，再開波波注音，在新文件裡按 Ctrl+V（手機長按貼上）；注音和破音字它會自己標 */
+    var bopoMsg = h('span', { class: 'small ws-bopo-msg', role: 'status' });
+    function toBopo() {
+      var src = preview.querySelector('.ws-sheet:not(.ws-answers)'); if (!src) return;
+      var box = src.cloneNode(true);
+      Array.prototype.forEach.call(box.querySelectorAll('img'), function (im) { im.src = im.src; im.removeAttribute('class'); im.style.width = '2.2cm'; im.style.float = 'right'; });
+      /* 波波注音貼上時不保留自動題號：把 1. 2. 3. 直接寫進去 */
+      Array.prototype.forEach.call(box.querySelectorAll('ol'), function (ol) {
+        var k = 0, div = document.createElement('div');
+        Array.prototype.forEach.call(ol.children, function (li) {
+          var p = document.createElement('p'); p.appendChild(document.createTextNode(++k + '. '));
+          while (li.firstChild) p.appendChild(li.firstChild);
+          div.appendChild(p);
+        });
+        ol.parentNode.replaceChild(div, ol);
+      });
+      (function strip(n) { if (n.nodeType === 3) n.nodeValue = n.nodeValue.replace(/[\uDB40][\uDDE0-\uDDEF]/g, ''); else for (var c = n.firstChild; c; c = c.nextSibling) strip(c); })(box);
+      var holder = h('div', { contenteditable: 'true', style: 'position:fixed;left:-9999px;top:0;width:800px;' }, box);
+      document.body.appendChild(holder);
+      var ok = false;
+      try {
+        var range = document.createRange(); range.selectNodeContents(holder);
+        var sel = root.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        ok = document.execCommand('copy'); sel.removeAllRanges();
+      } catch (e) { ok = false; }
+      holder.remove();
+      root.open('https://bopodoc.com/files', '_blank', 'noopener');
+      bopoMsg.textContent = ok ? '已複製學習單：在波波注音按「新增文件」，再按 Ctrl+V（手機長按→貼上）。' : '沒辦法自動複製，請在預覽上全選、複製，再貼到波波注音。';
     }
     function draw() {
       H3A.ui.clear(controls); H3A.ui.clear(preview);
@@ -145,11 +182,14 @@
       if (state.locked) controls.appendChild(unlockRow());
       controls.appendChild(h('div', { class: 'ws-row' },
         check('附參考答案（另一頁）', state.answers, function (on) { state.answers = on; }),
+        check('印標題（年級、第幾課）', state.title, function (on) { state.title = on; }, { class: 'ws-titlebox' }),
         check('印注音', state.zhuyin, function (on) { state.zhuyin = on; }),
         check('橫式（A4 橫印）', state.land, function (on) { state.land = on; }, { class: 'ws-landbox' })));
       controls.appendChild(h('div', { class: 'ws-row' },
         h('button', { type: 'button', class: 'btn btn-primary ws-print', onclick: function () { root.print(); } }, '🖨️ 列印'),
-        h('button', { type: 'button', class: 'btn ws-shuffle', onclick: function () { state.seed += 1; draw(); } }, '🔀 換一份題目')));
+        h('button', { type: 'button', class: 'btn ws-shuffle', onclick: function () { state.seed += 1; draw(); } }, '🔀 換一份題目'),
+        h('button', { type: 'button', class: 'btn ws-bopo', onclick: toBopo }, '🅱️ 用波波注音編輯'),
+        bopoMsg));
       pageStyle(state.land);
       var meta = list.filter(function (l) { return l.id === state.id; })[0];
       var sections = H3A.worksheet.build(words(), state.keys, state.seed, state.lesson,
