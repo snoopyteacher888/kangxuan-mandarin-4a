@@ -123,15 +123,18 @@
         /* 直排的冒號換成直式「︰」才會置中 */
         if (/：/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/：/g, '︰');
         if (n.parentNode && n.parentNode.classList && n.parentNode.classList.contains('ws-tcy')) return;
-        if (!/＿{2,}|（[　 ]*）|\d/.test(n.nodeValue)) return;
+        if (!/＿{2,}|（[　 ]*）|\d|…/.test(n.nodeValue)) return;
         var frag = document.createDocumentFragment();
-        n.nodeValue.split(/(＿{2,}|（[　 ]*）|\d+)/).forEach(function (t) {
+        n.nodeValue.split(/(＿{2,}|（[　 ]*）|\d+|…+)/).forEach(function (t) {
           if (!t) return;
           /* 數字直立（例如「第 1 課」的 1 不會躺下來） */
           if (/^\d+$/.test(t)) { frag.appendChild(h('span', { class: 'ws-tcy' }, t)); return; }
           /* 書寫線改實線；空括號加大（老師要求） */
           if (/^＿+$/.test(t)) frag.appendChild(h('span', { class: 'ws-vline', style: 'inline-size:' + Math.min(14, t.length * 0.9) + 'em' }));
-          else if (/^（/.test(t)) frag.appendChild(h('span', { class: 'ws-vparen' }, '（', h('span', { class: 'ws-vparen-in', style: 'inline-size:' + Math.max(4, (t.length - 2) * 1.2) + 'em' }), '）'));
+          /* 空括號長度：寫號碼的（　）短一點，寫字、寫語詞的長一點（老師要求括號要夠大） */
+          else if (/^（/.test(t)) { var k = t.length - 2; frag.appendChild(h('span', { class: 'ws-vparen' }, '（', h('span', { class: 'ws-vparen-in', style: 'inline-size:' + (k <= 1 ? 1.8 : k === 2 ? 2.6 : Math.max(4, k * 1.2)) + 'em' }), '）')); }
+          /* 句型的「……」：直排時換成連在一起的點線（老師要求不要留空） */
+          else if (/^…+$/.test(t)) frag.appendChild(h('span', { class: 'ws-vdots', style: 'inline-size:' + (t.length * 0.9) + 'em' }));
           else frag.appendChild(document.createTextNode(t));
         });
         n.parentNode.replaceChild(frag, n);

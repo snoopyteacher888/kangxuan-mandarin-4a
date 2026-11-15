@@ -1150,7 +1150,11 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-sheet:not(.ws-answers) .ws-items { list-style: none; padding: 0; margin: 0 0 0 .4em; }
 .ws-vert .ws-sheet:not(.ws-answers) .ws-items > li { margin: 0 0 0 .15em; }
 .ws-vert .ws-qno { margin-block-end: .35em; }
-.ws-vert .ws-vpage li, .ws-vert .ws-vpage li.ws-hang { display: block; }
+.ws-vert .ws-vpage li { display: block; }
+/* （　）開頭的題目：題號和括號在上面，題目和選項從同一個高度開始（老師要求選項跟題目對齊） */
+.ws-vert .ws-vpage li.ws-hang { display: flex; align-items: flex-start; }
+.ws-vert .ws-vpage li.ws-hang > .ws-body { display: block; }
+.ws-vert .ws-vpage li.ws-hang > .ws-qno { margin-block-end: 0; }
 .ws-vert .ws-vpage li > .ws-body, .ws-vert .ws-vpage li > .ws-pre { display: inline; }
 .ws-vert .ws-vparen-in { display: inline-block; block-size: 1em; }
 .ws-vert .ws-tcy { text-combine-upright: all; -webkit-text-combine: horizontal; font-family: var(--font) !important; }
@@ -1174,3 +1178,7 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vpage .ws-bank { border-style: solid; }
 /* 照樣寫短語表格裡的空括號：直排時也要夠長 */
 .ws-vert .ws-vpage .ws-pin { display: inline-block; min-width: 0; inline-size: 4.5em; block-size: 1em; }
+/* 造句的書寫線：一整行長、前後留寬一點（老師要求行距太小、直線要很長） */
+.ws-vert .ws-vpage li.ws-line .ws-vline { display: block; inline-size: 160mm !important; max-inline-size: none; block-size: 2.8em; margin: 0 .4em; }
+.ws-vert .ws-vpage li.ws-line { margin-left: .8em; }
+.ws-vert .ws-vdots { display: inline-block; block-size: 1em; vertical-align: middle; background: radial-gradient(circle, #000 1.2px, transparent 1.4px) center top / 100% .3em repeat-y; }
