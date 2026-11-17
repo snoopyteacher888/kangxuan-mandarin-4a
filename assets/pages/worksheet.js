@@ -12,7 +12,14 @@
   function bare(c) { return h('span', { class: 'ws-bare' }, c); }
   /* 國字注音：一句一行，注音或國字加底線，後面接（　）（老師要求：改回橫式、用句子） */
   /* 直書（老師要求，像考卷）：看注音寫國字 → 空的方格，右邊一欄注音；看國字寫注音 → 國字方格，右邊一欄空的寫注音 */
-  function zyCol(zy) { return h('span', { class: 'ws-zcol' }, zy ? zy.split('').map(function (c) { return h('span', { class: /[ˊˇˋ˙]/.test(c) ? 'ws-ztone' : '' }, c); }) : null); }
+  /* 注音欄：符號由上往下排；二三四聲的聲調放在最後一個符號的右邊、輕聲「˙」放在最上面（跟課本一樣；老師回報聲調印不出來） */
+  function zyCol(zy) {
+    if (!zy) return h('span', { class: 'ws-zcol' });
+    var light = zy.charAt(0) === '˙', body = light ? zy.slice(1) : zy, tone = /[ˊˇˋ]$/.test(body) ? body.slice(-1) : '';
+    var syms = (tone ? body.slice(0, -1) : body).split('');
+    return h('span', { class: 'ws-zcol' }, light ? h('span', { class: 'ws-zlight' }, '˙') : null,
+      syms.map(function (c, i) { return h('span', { class: 'ws-zsym' }, c, i === syms.length - 1 && tone ? h('span', { class: 'ws-ztone' }, tone) : null); }));
+  }
   function vertZy(it) {
     var box = it.kind === 'char' ? h('span', { class: 'ws-zbox' }, h('span', { class: 'ws-zcell' }), zyCol(it.parts[1]))
       : h('span', { class: 'ws-zbox' }, h('span', { class: 'ws-zcell' }, it.parts[1]), zyCol(''));

@@ -210,6 +210,11 @@ function doPost(e) {
         append: function (row) { ss.appendRow(row); }
       };
       if (sAdapter.ids().indexOf(body.speech.id) >= 0) return json({ ok: true, dup: true });
+      /* 全班上課時老師當場打字、修改過的句子：直接算批改完成（老師修改的句子放在 teacherNote） */
+      if (body.speech.place === 'school' && body.speech.reviewed === true) {
+        body.speech.status = 'ok'; body.speech.gradedAt = body.speech.ts;
+        body.speech.teacherNote = String(body.speech.teacherNote || '').slice(0, 200);
+      } else body.speech.teacherNote = '';
       sAdapter.append(speechToRow(body.speech));
       return json({ ok: true });
     } finally { lockS.releaseLock(); }

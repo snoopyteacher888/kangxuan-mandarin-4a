@@ -90,7 +90,33 @@
       H3A.ui.showHint(feedback, { text: q.hints.h2.text, say: q.hints.h2.text + q.front }, ctx, asked);
     }
     box.appendChild(h('div', { class: 'speak-tools' }, mic, bulb)); box.appendChild(status); box.appendChild(said); box.appendChild(actions);
+    /* 全班上課（老師要求）：學生說、老師打字；另一行老師打上修改後的句子，送出後兩句並排讓學生對照 */
+    if (ctx.place === 'school') { classTyping(); return; }
     if (!Recognition()) useTyping();
+    function classTyping() {
+      mic.hidden = true;
+      var a = h('textarea', { class: 'type-box', rows: 2, maxlength: 200, 'aria-label': '學生說的句子' });
+      var b = h('textarea', { class: 'type-box', rows: 2, maxlength: 200, 'aria-label': '老師修改後的句子' });
+      var go = h('button', { type: 'button', class: 'btn-primary', onclick: function () {
+        var t = a.value.trim(); if (!t || finished) { if (!t) a.focus(); return; }
+        finished = true; go.disabled = true; a.disabled = true; b.disabled = true; if (bulb) bulb.remove();
+        var full = ((q.front || '') + t).slice(0, 200), fix = b.value.trim().slice(0, 200);
+        if (fix === full || fix === t) fix = '';
+        H3A.api.submitSpeech({
+          id: uuid(), ts: new Date().toISOString(), student: ctx.student, place: ctx.place, lesson: ctx.lessonId,
+          activity: ctx.activity, qid: q.id, prompt: String(q.prompt).slice(0, 200), said: full, status: 'pending', teacherNote: fix, reviewed: true
+        });
+        H3A.ui.clear(feedback); feedback.className = 'feedback ok';
+        feedback.appendChild(h('div', { class: 'class-compare' },
+          h('p', {}, h('span', { class: 'cmp-label' }, '🧒 學生說的：'), full, H3A.ui.speaker(full, null)),
+          fix ? h('p', { class: 'cmp-fix' }, h('span', { class: 'cmp-label' }, '👩‍🏫 老師修改：'), fix, H3A.ui.speaker(fix, null)) : h('p', {}, '👍 說得很好，不用改！')));
+        if (fix) H3A.tts.speak('老師修改：' + fix);
+        done(fix ? 'hint1' : 'first', { said: full, status: 'ok' });
+      } }, '✅ 送出');
+      box.insertBefore(h('div', { class: 'type-wrap class-type' },
+        h('p', {}, '🧒 學生說，老師幫忙打字：'), a,
+        h('p', {}, '👩‍🏫 老師修改後的句子（不用改就空著）：'), b, go), status);
+    }
 
     function setListening(on) {
       mic.classList.toggle('listening', on);
