@@ -79,7 +79,8 @@
           gradeBox.appendChild(h('p', { class: 'error' }, '後台需要更新：請照「老師使用說明」貼上新的 Code.gs，再用「管理部署作業 → 編輯 → 新版本」部署。更新後，學生說的句子就會送進來。'));
           return;
         }
-        showSpeech(mergePending(res.speech || []));
+        /* 全班上課時老師當場打字、修改過的句子，不用再批改（老師要求），不放進待批改 */
+        showSpeech(mergePending((res.speech || []).filter(function (x) { return !(x.student === 'class' && x.place === 'school'); })));
       }, function () { H3A.ui.clear(gradeBox); gradeBox.appendChild(h('p', { class: 'error' }, '待批改：無法連線，請檢查網路')); });
     }
     function speechRow(r) {
@@ -128,6 +129,7 @@
       });
       lastRecords.forEach(function (rec) {
         if (fStu.value && rec.student !== fStu.value) return;
+        if (rec.student === 'class' && rec.place === 'school') return;
         (rec.items || []).forEach(function (it) {
           if (it.result !== 'pending' || !it.said || have[key(rec.student, it.q, it.said)]) return;
           have[key(rec.student, it.q, it.said)] = true;
