@@ -279,12 +279,44 @@ function doPost(e) {
     return json({ ok: true, roster: readRoster() });
   }
 
+  /* 讀 Google 雲端的原稿（老師要求：在加密工具貼雲端連結就能讀）：要先登入老師後台；只讀 .json 和 .zip */
+  if (action === 'driveFiles') {
+    if (!checkToken(body.token)) return json({ error: 'AUTH' });
+    try { return json(driveFiles(String(body.url || ''))); }
+    catch (err) { return json({ error: 'DRIVE', detail: String((err && err.message) || err) }); }
+  }
+
   return json({ error: 'UNKNOWN_ACTION' });
+}
+
+/* 從雲端連結取出檔案或資料夾的 ID */
+function driveId(url) {
+  url = String(url || '').trim();
+  var m = /\/folders\/([\w-]{10,})/.exec(url);
+  if (m) return { id: m[1], folder: true };
+  m = /\/d\/([\w-]{10,})/.exec(url) || /[?&]id=([\w-]{10,})/.exec(url) || /^([\w-]{20,})$/.exec(url);
+  return m ? { id: m[1], folder: false } : null;
+}
+function driveFiles(url) {
+  var x = driveId(url);
+  if (!x) throw new Error('BAD_URL');
+  var files = [], skipped = [], total = 0, LIMIT = 40 * 1024 * 1024;
+  function add(f) {
+    var name = f.getName();
+    if (!/\.(json|zip)$/i.test(name)) { skipped.push(name); return; }
+    if (total + f.getSize() > LIMIT) { skipped.push(name); return; }
+    total += f.getSize();
+    files.push({ name: name, b64: Utilities.base64Encode(f.getBlob().getBytes()) });
+  }
+  function addFolder(id) { var it = DriveApp.getFolderById(id).getFiles(); while (it.hasNext()) add(it.next()); }
+  if (x.folder) addFolder(x.id);
+  else { try { add(DriveApp.getFileById(x.id)); } catch (e) { addFolder(x.id); } }
+  return { files: files, skipped: skipped };
 }
 
 if (typeof module !== 'undefined') {
   module.exports = { validateRecord: validateRecord, lockState: lockState, registerFail: registerFail, toRow: toRow,
     fromRow: fromRow, submitRecord: submitRecord, filterRecords: filterRecords, validateRoster: validateRoster,
     SPEECH_COLUMNS: SPEECH_COLUMNS, validateSpeech: validateSpeech, speechToRow: speechToRow, speechFromRow: speechFromRow, filterSpeech: filterSpeech,
-    applyGrade: applyGrade, feedbackFor: feedbackFor };
+    applyGrade: applyGrade, feedbackFor: feedbackFor, driveId: driveId };
 }

@@ -15,6 +15,8 @@ function start(port, opts = {}) {
       let body = ''; req.on('data', c => { body += c; }); req.on('end', () => {
         const msg = JSON.parse(body); posts.push(msg);
         res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Content-Type', 'application/json');
+        /* 讀雲端：測試在 global.__fakeDrive 放好要回傳的檔案 */
+        if (msg.action === 'driveFiles') return res.end(JSON.stringify(msg.token !== 't1' ? { error: 'AUTH' } : (global.__fakeDrive || { error: 'UNKNOWN_ACTION' })));
         if (msg.action === 'roster') return res.end(JSON.stringify({ roster }));
         if (msg.action === 'login') return res.end(JSON.stringify(msg.password === 'teacher-pass' ? { token: 't1' } : { error: 'BAD_PASSWORD' }));
         if (msg.action === 'records') return res.end(JSON.stringify(msg.token === 't1' ? { records: posts.filter(p => p.action === 'submit').map(p => p.record), roster } : { error: 'AUTH' }));

@@ -81,3 +81,35 @@ z.close()`, zf, path.join(__dirname, '../fixtures/fake06.plain.json')]);
   assert.deepEqual(Object.keys(zip).sort(), ['lesson03.enc.js', 'lesson04.enc.js']);
   assert.deepEqual(errors, []);
 });
+
+test('paste a Google Drive link: the teacher backend reads the files (zip inside too)', async () => {
+  const zf = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'encd-')), 'lessons.zip');
+  require('child_process').execFileSync('python3', ['-I', '-c', `
+import zipfile,sys,json
+src=json.load(open(sys.argv[2],encoding='utf8'))
+z=zipfile.ZipFile(sys.argv[1],'w',zipfile.ZIP_DEFLATED)
+src['id']='L08'; z.writestr('lesson08.plain.json', json.dumps(src,ensure_ascii=False))
+z.close()`, zf, path.join(__dirname, '../fixtures/fake06.plain.json')]);
+  global.__fakeDrive = { files: [
+    { name: 'lesson07.plain.json', b64: Buffer.from(JSON.stringify(fakeLesson('L07'))).toString('base64') },
+    { name: 'lessons.zip', b64: fs.readFileSync(zf).toString('base64') }], skipped: ['照片.jpg'] };
+  const ctx = await browser.newContext({ acceptDownloads: true });
+  const p = await ctx.newPage();
+  const errors = []; p.on('pageerror', e => errors.push(e.message));
+  await p.goto(BASE + '#/');
+  const prefix = await p.evaluate(() => (window.H3A.ui.gateOk.toString().match(/getItem\('([^']+)'\)/) || [])[1]);
+  await p.evaluate(k => sessionStorage.setItem(k, '1'), prefix);
+  await p.goto(BASE + '#/teacher/encrypt');
+  await p.fill('input[aria-label="雲端連結"]', 'https://drive.google.com/drive/folders/abcdefghijklmnopqrstu');
+  await p.click('button:has-text("讀取雲端")');
+  await p.fill('input[aria-label="老師密碼"]', 'teacher-pass');
+  await p.click('button:has-text("讀取雲端")');
+  await p.waitForFunction(() => /已讀取 2 個檔案/.test(document.querySelector('form').textContent));
+  await p.fill('input[aria-label="教室密碼"]', 'cloud-pass-1');
+  await p.fill('input[aria-label="再輸入一次"]', 'cloud-pass-1');
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("加密並下載")')]).catch(async e => { throw new Error(await p.textContent('form')); });
+  const zip = readZip(fs.readFileSync(await dl.path()));
+  assert.deepEqual(Object.keys(zip).sort(), ['lesson07.enc.js', 'lesson08.enc.js']);
+  assert.deepEqual(errors, []);
+  global.__fakeDrive = null;
+});

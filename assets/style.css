@@ -1218,3 +1218,4 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vhdr .ws-title .ws-title-sm { font-size: 1em; font-weight: 700; }
 .ws-vert .ws-vhdr .ws-who { display: block; margin: 0; }
 .ws-vert .ws-vhdr .ws-who .ws-vline { inline-size: 6em !important; }
+.cloud-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .cloud-row .big-input { flex: 1 1 260px; }
