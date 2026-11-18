@@ -116,7 +116,7 @@ test('map has a 人事時地物 step when words.wh exists (老師要求)', async
   });
   await unlock(p, '#/L06/map?s=cat'); await p.waitForSelector('.step-tab[data-step="wh"]');
   /* 先練人事時地物，再練課文架構（老師要求） */
-  assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['wh', 'map']);
+  await p.waitForSelector('.step-tab'); assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['wh', 'map']);
   await p.waitForSelector('.wh-table');
   assert.equal(await p.$$eval('.wh-tile', x => x.length), 5);
   await p.click('.btn-next:not([hidden])');

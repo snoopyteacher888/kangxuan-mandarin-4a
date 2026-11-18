@@ -41,6 +41,14 @@
   /* 課文：用這台裝置記住的金鑰解密 window.ENC[id] */
   function getLesson(id) {
     if (lessonCache[id]) return Promise.resolve(lessonCache[id]);
+    /* 先讀公開的課文；沒有才用加密檔（要教室密碼） */
+    if (H3A.data && H3A.data.text) return H3A.data.text(id).then(function (t) {
+      if (t) { lessonCache[id] = patch(id, JSON.parse(JSON.stringify(t))); return lessonCache[id]; }
+      return H3A.data.enc(id).then(function () { return getEncLesson(id); });
+    });
+    return getEncLesson(id);
+  }
+  function getEncLesson(id) {
     var box = root.ENC && root.ENC[id];
     if (!box) return Promise.reject(new Error('NO_DATA'));
     var k = store.get('key', null);
@@ -52,6 +60,10 @@
   }
   /* 用密碼解開某一課；成功才記住金鑰 */
   function unlock(id, password) {
+    if (H3A.data && H3A.data.enc && !(root.ENC && root.ENC[id])) return H3A.data.enc(id).then(function () { return unlockNow(id, password); });
+    return unlockNow(id, password);
+  }
+  function unlockNow(id, password) {
     var box = root.ENC && root.ENC[id];
     if (!box) return Promise.reject(new Error('NO_DATA'));
     return H3A.cryptobox.deriveKey(password, root.H3A_SALT).then(function (key) {

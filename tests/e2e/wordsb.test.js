@@ -95,7 +95,7 @@ test('phrase speak exact answer is correct', async () => {
   const before = srv.posts.filter(x => x.action === 'submit').length;
   const p = await page(); await p.goto(BASE + '#/L06/phrase?s=bear');
   /* 每個短語都是：認識短語 → 看圖選詞 → 拼短語（老師要求），最後才是看圖說說看 */
-  assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['intro', 'pick', 'fill1', 'say']);
+  await p.waitForSelector('.step-tab'); assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['intro', 'pick', 'fill1', 'say']);
   await p.goto(BASE + '#/L06/phrase?s=bear&step=say');
   await p.waitForSelector('.mic-btn');
   await say(p, '閃亮亮的鉛筆。');
@@ -116,7 +116,7 @@ test('phrase speak exact answer is correct', async () => {
 test('學會語詞沒有造句步驟', async () => {
   const p = await page(); await p.goto(BASE + '#/L06/vocab?s=bear');
   await p.waitForSelector('.step-tab');
-  assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['cards', 'picmatch', 'choose', 'memory']);
+  await p.waitForSelector('.step-tab'); assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['cards', 'picmatch', 'choose', 'memory']);
   assert.deepEqual(p.errors, []);
 });
 

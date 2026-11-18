@@ -53,7 +53,7 @@ async function tapTiles(p, word) {
 
 test('生字變成語：學成語（兩個一組：卡片→排字→放進句子）、看情境、配對', async () => {
   const p = await page(); await p.goto(BASE + '#/L06/idiom?s=bear');
-  assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['learn', 'situation', 'match']);
+  await p.waitForSelector('.step-tab'); assert.deepEqual(await p.$$eval('.step-tab', x => x.map(e => e.dataset.step)), ['learn', 'situation', 'match']);
   let first = true;
   for (let g = 0; g < 3; g++) {
     await p.waitForSelector('.idiom-card');

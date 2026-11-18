@@ -29,6 +29,22 @@
     }).then(function () { return have(id) || null; }, function () { delete pending[id]; return null; });
     return pending[id];
   }
+  /* 課文（老師要求拿掉教室密碼，課文公開）：data/lessonNN.text.js；沒有的話退回加密檔 data/lessonNN.enc.js（都是點進去才下載） */
+  var pendingText = {}, pendingEnc = {};
+  function text(id) {
+    if (root.H3A_TEXT && root.H3A_TEXT[id]) return Promise.resolve(root.H3A_TEXT[id]);
+    if (!/^L\d\d$/.test(id || '')) return Promise.resolve(null);
+    if (!pendingText[id]) pendingText[id] = loadScript('data/lesson' + id.slice(1) + '.text.js' + (V ? '?v=' + V : ''))
+      .then(function () { return (root.H3A_TEXT && root.H3A_TEXT[id]) || null; }, function () { return null; });
+    return pendingText[id];
+  }
+  function enc(id) {
+    if (root.ENC && root.ENC[id]) return Promise.resolve(root.ENC[id]);
+    if (!/^L\d\d$/.test(id || '')) return Promise.resolve(null);
+    if (!pendingEnc[id]) pendingEnc[id] = loadScript('data/lesson' + id.slice(1) + '.enc.js?t=' + Math.floor(Date.now() / 600000))
+      .then(function () { return (root.ENC && root.ENC[id]) || null; }, function () { delete pendingEnc[id]; return null; });
+    return pendingEnc[id];
+  }
   function allWords() {
     return Promise.all((root.H3A_LESSONS || []).map(function (l) { return words(l.id); }));
   }
@@ -39,5 +55,5 @@
     warmedAt = Date.now();
     H3A.api.call('ping', {}).catch(function () {});
   }
-  H3A.data = { words: words, allWords: allWords, warmBackend: warmBackend };
+  H3A.data = { words: words, allWords: allWords, text: text, enc: enc, warmBackend: warmBackend };
 })(this);
