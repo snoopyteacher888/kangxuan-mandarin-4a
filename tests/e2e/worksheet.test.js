@@ -20,7 +20,7 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   await p.click('.picker-card[data-student="bear"]');
   await p.click('.ws-open');
   await p.waitForSelector('.ws-sheet');
-  assert.match(await p.locator('.ws-title').first().innerText(), /第 1 課/);
+  await p.waitForFunction(n => { const t = document.querySelector('.ws-title'); return t && t.innerText.replace(/[\uDB40-\uDBFF][\uDC00-\uDFFF]/g, '').includes('第 ' + n + ' 課'); }, '1'); assert.match(await p.locator('.ws-title').first().innerText(), /第 1 課/);
   // 沒有教室密碼：顯示輸入密碼，沒有閱讀理解
   await p.waitForSelector('.ws-unlock');
   assert.equal(await p.locator('.ws-reading').count(), 0);
@@ -48,7 +48,7 @@ test('home button opens the worksheet; sections, toggles and shuffle work', asyn
   await p.uncheck('input[data-key="fix"]');
   // 換課
   await p.selectOption('.ws-lesson', 'L12');
-  assert.match(await p.locator('.ws-title').first().innerText(), /第 12 課/);
+  await p.waitForFunction(n => { const t = document.querySelector('.ws-title'); return t && t.innerText.replace(/[\uDB40-\uDBFF][\uDC00-\uDFFF]/g, '').includes('第 ' + n + ' 課'); }, '12'); assert.match(await p.locator('.ws-title').first().innerText(), /第 12 課/);
   const before = await p.locator('.ws-sheet').first().innerText();
   await p.click('.ws-shuffle');
   assert.notEqual(await p.locator('.ws-sheet').first().innerText(), before);
@@ -73,5 +73,5 @@ test('deep link #/worksheet/L07 picks the lesson', async () => {
   const p = await (await browser.newContext()).newPage();
   await p.goto(BASE + '#/worksheet/L07');
   await p.waitForSelector('.ws-sheet');
-  assert.match(await p.locator('.ws-title').first().innerText(), /第 7 課/);
+  await p.waitForFunction(n => { const t = document.querySelector('.ws-title'); return t && t.innerText.replace(/[\uDB40-\uDBFF][\uDC00-\uDFFF]/g, '').includes('第 ' + n + ' 課'); }, '7'); assert.match(await p.locator('.ws-title').first().innerText(), /第 7 課/);
 });

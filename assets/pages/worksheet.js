@@ -350,6 +350,13 @@
         paginate(sheet, holder); sheet.remove();
       }
     }
+    /* 直書分欄是照字的寬度算的：網路字型（霞鶩文楷、注音字型）晚一點才載入，載入後字寬會變，要重新排一次，
+       不然會留下空位或超出（老師回報第八大題沒有排到上欄的空位） */
+    var refit = null;
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', function () {
+      if (!state.vert || !preview.isConnected) return;
+      clearTimeout(refit); refit = setTimeout(draw, 250);
+    });
     draw(); load();
   };
 })(this);
