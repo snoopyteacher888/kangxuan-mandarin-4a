@@ -425,15 +425,13 @@ test('who page: guest picks without password and records go to backend as guest'
   assert.deepEqual(p.errors, []);
 });
 
-test('who page: pick an animal, or whole class with teacher password', async () => {
+test('who page: pick an animal, or whole class without a password', async () => {
   const p = await page(); await p.goto(BASE + '#/who');
   await p.click('.picker-card[data-student="bear"]');
   await p.waitForSelector('.who-open >> text=小熊（換人）');
   await p.click('.who-open');
   await p.click('.picker-card[data-student="class"]');
-  await p.fill('.class-pass input[type=password]', 'wrong'); await p.click('.class-pass button[type=submit]');
-  await p.waitForSelector('.class-pass .error >> text=密碼不對');
-  await p.fill('.class-pass input[type=password]', 'teacher-pass'); await p.click('.class-pass button[type=submit]');
+  assert.equal(await p.$('.class-pass'), null); /* 全班不用密碼 */
   await p.waitForSelector('.who-open >> text=全班（換人）');
   assert.deepEqual(p.errors, []);
 });

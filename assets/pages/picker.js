@@ -13,7 +13,8 @@
     if (!roster.length) grid.appendChild(h('button', { type: 'button', class: 'picker-card', 'data-student': 'class', onclick: function () {
       H3A.session.saveSettings({ mode: 'class' }); ctx.onPick(null);
     } }, h('span', { class: 'picker-emoji' }, '👨‍👩‍👧‍👦'), h('span', {}, '全班')));
-    if (ctx.allowClass && roster.length) grid.insertBefore(h('button', { type: 'button', class: 'picker-card', 'data-student': 'class', onclick: askClass },
+    /* 全班不用密碼（老師要求：只留老師後台要密碼） */
+    if (ctx.allowClass && roster.length) grid.insertBefore(h('button', { type: 'button', class: 'picker-card', 'data-student': 'class', onclick: function () { ctx.onPick('class'); } },
       h('span', { class: 'picker-emoji' }, '👨‍👩‍👧‍👦'), h('span', {}, '全班')), grid.firstChild);
     /* 訪客：不用密碼，紀錄一樣送到後台，學生欄寫「訪客」（給專業老師測試、分享說明用） */
     grid.appendChild(h('button', { type: 'button', class: 'picker-card guest', 'data-student': 'guest', onclick: function () {

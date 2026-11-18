@@ -185,11 +185,9 @@ test('unknown student id shows picker', async () => {
 test('class mode records class', async () => {
   const before = submits().length;
   const p = await page(() => localStorage.setItem('k4a.settings', JSON.stringify({ mode: 'class', zhuyin: false })));
-  /* 全班模式：每次打開網頁都要先輸入老師密碼 */
+  /* 全班模式：不用密碼，點「全班」就進去 */
   await p.goto(BASE + '#/L06/read');
   await p.click('.picker-card[data-student="class"]');
-  await p.fill('.class-pass input[type=password]', 'teacher-pass'); await p.click('.class-pass button[type=submit]');
-  await p.waitForSelector('.class-pass', { state: 'detached' });
   await p.fill('input[type=password]', 'test-pass'); await p.click('button[type=submit]');
   await p.click('text=我讀完了'); await p.waitForSelector('.result');
   for (let i = 0; i < 20 && submits().length === before; i++) await p.waitForTimeout(50);
