@@ -1209,7 +1209,9 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .ws-vert .ws-vcols li.ws-line .ws-vline { inline-size: 74mm !important; }
 /* 直書時選項照一般文字排，太長就換到下一行，不會超出欄外 */
 .ws-vert .ws-vpage .ws-opts, .ws-vert .ws-vpage .ws-choices { display: block; padding: 0; }
-.ws-vert .ws-vpage .ws-opts > span, .ws-vert .ws-vpage .ws-choices > span { margin-inline-end: 1.2em; }
+.ws-vert .ws-vpage .ws-opts > span, .ws-vert .ws-vpage .ws-choices > span { margin-inline-end: 1.2em; display: inline-block; }
+/* 一個選項不要拆到兩行（老師回報「④經／濟」跑版）；太長的選項才在選項裡換行 */
+.ws-vert .ws-vpage .ws-choices > span { white-space: nowrap; }
 /* 照樣寫短語的表格在半頁高的欄裡要放得下 */
 .ws-vert .ws-vpage .ws-ptable { font-size: .78em; }
 .ws-vert .ws-vpage .ws-pcard { padding: .1em .35em; min-width: 0; }

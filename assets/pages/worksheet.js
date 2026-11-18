@@ -130,6 +130,12 @@
         var block = Array.prototype.filter.call(body.children, function (c) { return c.tagName === 'DIV'; })[0];
         body.insertBefore(im, block || null);
       });
+      /* 句子開頭就是要填的空格（例如「（　　　　）是日本最熱鬧的城市」）：直書時跟一般句子一樣往下排，不要把括號單獨放在上面（老師回報跑版）。
+         只有寫代號的短括號（修辭、閱讀理解）才把括號放上面、題目和選項對齊 */
+      Array.prototype.forEach.call(ol.querySelectorAll(':scope > li.ws-hang'), function (li) {
+        var pre = li.querySelector(':scope > .ws-pre');
+        if (pre && pre.textContent.length > 3) li.classList.remove('ws-hang');
+      });
       Array.prototype.filter.call(ol.children, function (x) { return x.tagName === 'LI'; }).forEach(function (li, i) {
         /* 題號直立、不加點（老師要求：點很礙眼），跟題目接在同一行 */
         li.insertBefore(h('span', { class: 'ws-qno' }, h('span', { class: 'ws-tcy' }, String(i + 1))), li.firstChild);
