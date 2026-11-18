@@ -202,6 +202,8 @@
       else { page.appendChild(b.el); list = null; cur = null; }
     }
     function trySplit(b) {
+      /* 只能從上欄跨到下欄，不能跨頁（老師要求）：在下欄放不下就整題移到下一頁 */
+      if (bi !== 0) return false;
       var opts = b.el.querySelector('.ws-opts'); if (!opts) return false;
       var cont = h('li', { class: 'ws-cont' + (b.el.classList.contains('ws-hang') ? ' ws-cont-hang' : '') });
       var holder = opts.parentNode, nextSib = opts.nextSibling, moved = [];
