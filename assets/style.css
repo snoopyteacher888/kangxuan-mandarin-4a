@@ -1232,3 +1232,4 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 .class-compare p { margin: .3em 0; font-size: 1.15em; }
 .class-compare .cmp-label { font-weight: 700; }
 .class-compare .cmp-fix { color: #1d6b3a; }
+.ws-vert .ws-vpage li.ws-cont { margin-top: 2.6em; } /* 接到下一欄的選項：往下縮，對齊題目 */

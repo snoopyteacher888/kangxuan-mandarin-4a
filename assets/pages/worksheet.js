@@ -201,6 +201,16 @@
       } else if (b.lead && hdr) { hdr.appendChild(b.el); }
       else { page.appendChild(b.el); list = null; cur = null; }
     }
+    function trySplit(b) {
+      var opts = b.el.querySelector('.ws-opts'); if (!opts) return false;
+      var cont = h('li', { class: 'ws-cont' + (b.el.classList.contains('ws-hang') ? ' ws-cont-hang' : '') });
+      var holder = opts.parentNode, nextSib = opts.nextSibling, moved = [];
+      /* 選項和選項後面的東西（提示、圖）一起移到下一欄 */
+      for (var n = opts; n; ) { var nx = n.nextSibling; moved.push(n); cont.appendChild(n); n = nx; }
+      if (over()) { moved.forEach(function (n) { holder.insertBefore(n, nextSib); }); return false; }
+      nextBand(); put({ el: cont, item: true, sec: b.sec });
+      return true;
+    }
     newPage();
     blocks.forEach(function (b, i) {
       put(b);
@@ -208,6 +218,8 @@
       var next = blocks[i + 1];
       if (b.done) return;
       if (b.head && next && next.item) { put(next); next.done = true; }
+      /* 這一欄放不下、但題目後面有選項：題目留在這一欄，選項接到下一欄（老師要求不要留大空白） */
+      if (over() && b.item && trySplit(b)) return;
       /* 這一欄放不下：欄裡除了這一題還有別的東西，就把這一題移到下一欄（下欄放不下就換頁） */
       if (over() && (page.childNodes.length > 1 || page.querySelectorAll('li').length > (b.item ? 1 : 0) + (next && next.done ? 1 : 0))) {
         var moving = [b.el]; if (b.head && next && next.done) moving.push(next.el);
