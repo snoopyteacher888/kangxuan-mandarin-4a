@@ -17,7 +17,8 @@
     });
     main.appendChild(grid);
     /* 老師批改過的課次，課次卡上出現「老師已批改」；有退回的句子再加「要修改」 */
-    var who = ctx.settings.mode === 'class' ? 'class' : ctx.settings.student;
+    /* 全班模式不顯示（老師要求：全班不需要「老師已批改」） */
+    var who = ctx.settings.mode === 'class' ? null : ctx.settings.student;
     if (who && H3A.feedback) H3A.feedback.summary(who).then(function (sum) {
       Object.keys(sum).forEach(function (id) {
         var card = grid.querySelector('[data-lesson="' + id + '"]');
