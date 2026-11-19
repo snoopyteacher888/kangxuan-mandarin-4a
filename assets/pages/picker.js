@@ -19,7 +19,7 @@
     /* 訪客：不用密碼，紀錄一樣送到後台，學生欄寫「訪客」（給專業老師測試、分享說明用） */
     grid.appendChild(h('button', { type: 'button', class: 'picker-card guest', 'data-student': 'guest', onclick: function () {
       H3A.session.saveSettings({ mode: 'student' }); ctx.onPick('guest');
-    } }, h('span', { class: 'picker-emoji' }, '🙋'), h('span', {}, '訪客')));
+    } }, h('span', { class: 'picker-emoji' }, '👤'), h('span', {}, '訪客')));
     main.appendChild(grid);
     var box = h('div');
     main.appendChild(box);
