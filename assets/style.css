@@ -1210,6 +1210,8 @@ html.zhuyin .plain-chars .pc { display: inline-block; width: 1em; overflow: hidd
 /* 直書時選項照一般文字排，太長就換到下一行，不會超出欄外 */
 .ws-vert .ws-vpage .ws-opts, .ws-vert .ws-vpage .ws-choices { display: block; padding: 0; }
 .ws-vert .ws-vpage .ws-opts > span, .ws-vert .ws-vpage .ws-choices > span { margin-inline-end: 1.2em; display: inline-block; }
+/* 選項太長換行時，第二行對齊①後面的字，不要頂到最上面（老師說跑版） */
+.ws-vert .ws-vpage .ws-opts > span { padding-inline-start: 1em; text-indent: -1em; }
 /* 一個選項不要拆到兩行（老師回報「④經／濟」跑版）；太長的選項才在選項裡換行 */
 .ws-vert .ws-vpage .ws-choices > span { white-space: nowrap; }
 /* 照樣寫短語的表格在半頁高的欄裡要放得下 */
