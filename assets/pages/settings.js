@@ -1,4 +1,4 @@
-/* 老師設定：裝置模式、自動念題目、任務連結、鎖定課文、清除紀錄 */
+/* 老師設定：裝置模式、自動念題目、鎖定課文、清除紀錄（任務連結已拿掉：老師直接傳學習樂園首頁的連結） */
 (function (root) {
   var H3A = root.H3A; var h = H3A.ui.h;
   var ACTS = ['read', 'map', 'quiz', 'test', 'feedback', 'redo'];
@@ -31,33 +31,6 @@
     mode.appendChild(h('label', { class: 'check', for: 'zhuyin' }, zy, ' 國字旁邊顯示注音'));
     main.appendChild(mode);
 
-    // 任務連結
-    var link = section('產生任務連結（傳給家長）');
-    var lStu = h('select', { class: 'big-select', 'aria-label': '學生' }, roster.map(function (r) { return h('option', { value: r.id }, r.emoji + ' ' + r.name); }).concat([h('option', { value: 'guest' }, '🙋 訪客')]));
-    var lLesson = h('select', { class: 'big-select', 'aria-label': '課次' }, lessons.map(function (l) { return h('option', { value: l.id }, '第 ' + parseInt(l.id.slice(1), 10) + ' 課 ' + l.title); }));
-    var lAct = h('select', { class: 'big-select', 'aria-label': '活動' }, ACTS.map(function (a) { return h('option', { value: a }, H3A.pages.activityTitle(a)); }));
-    var lAuto = h('input', { type: 'checkbox', id: 'lauto' });
-    var out = h('input', { type: 'text', class: 'big-input link-out', readonly: true, 'aria-label': '任務連結' });
-    var copied = h('span', { class: 'saved' });
-    function update() {
-      out.value = H3A.links.buildTaskLink(root.location.origin + root.location.pathname,
-        { lesson: lLesson.value, activity: lAct.value, student: lStu.value, auto: lAuto.checked });
-    }
-    [lStu, lLesson, lAct, lAuto].forEach(function (el) { el.addEventListener('change', update); });
-    if (!roster.length) link.appendChild(h('p', { class: 'notice' }, '還沒有學生名冊。請先到「老師後台 → 學生名冊」新增學生。'));
-    else {
-      link.appendChild(h('div', { class: 'form-row' }, lStu, lLesson, lAct));
-      link.appendChild(h('label', { class: 'check', for: 'lauto' }, lAuto, ' 自動念出題目'));
-      link.appendChild(out);
-      link.appendChild(h('button', { type: 'button', class: 'btn-primary', onclick: function () {
-        var done = function () { copied.textContent = '已複製，可以貼到 LINE'; };
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(out.value).then(done, function () { out.select(); copied.textContent = '請長按連結手動複製'; });
-        else { out.select(); try { document.execCommand('copy'); done(); } catch (e) { copied.textContent = '請長按連結手動複製'; } }
-      } }, '📋 複製連結'));
-      link.appendChild(copied);
-      update();
-    }
-    main.appendChild(link);
 
     // 其他
     var more = section('其他');
