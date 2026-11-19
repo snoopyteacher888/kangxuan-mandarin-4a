@@ -19,11 +19,15 @@
       return;
     }
     questions = H3A.quizgen.shuffle(questions, r);
-    H3A.ui.runQuestions(main, ctx, { questions: questions, mode: 'practice', recordMiss: false, onDone: function (summary) {
+    H3A.ui.runQuestions(main, ctx, { questions: questions, mode: 'practice', recordMiss: false, review: true, onDone: function (summary) {
       var q = H3A.session.reviewQueue(ctx.student);
       summary.items.forEach(function (it) { q = H3A.review.recordReview(q, keys[it.q] || H3A.review.key(ctx.lessonId, it.q), it.result === 'first', today); });
       H3A.session.saveReviewQueue(ctx.student, q);
       H3A.ui.finishActivity(main, ctx, 'review', summary, function () { run(main, ctx); }, false);
+      /* 結果頁上面加一句：打敗了幾隻錯題怪獸 */
+      var beat = summary.items.filter(function (it) { return it.result === 'first'; }).length, res = main.querySelector('.result');
+      var msg = beat ? '你打敗了 ' + beat + ' 隻錯題怪獸！' : '錯題怪獸還在，下次一定打得贏！';
+      if (res) res.insertBefore(h('p', { class: 'monster-win' }, msg, H3A.ui.speaker(msg, null)), res.firstChild);
     } });
   };
 })(this);

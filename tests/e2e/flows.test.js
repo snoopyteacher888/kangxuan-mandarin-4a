@@ -298,7 +298,7 @@ test('similar wrong shows hint', async () => {
 test('review without unlock shows word items only', async () => {
   const p = await page(() => localStorage.setItem('k4a.review.bear', JSON.stringify({ q1: { last: '2000-01-01', streak: 0 }, s1: { last: '2000-01-01', streak: 0 } })));
   await p.goto(BASE + '#/L06/review?s=bear'); await p.waitForSelector('.option');
-  assert.equal(await p.$$eval('.dot', x => x.length), 1);
+  assert.equal(await p.$$eval('.monster-bar .mon', x => x.length), 1);
   assert.equal(await p.textContent('.prompt h2'), WORDS.similar[0].sentence.replace(/＿+/, ''));
   assert.ok(await p.$('.prompt h2 .blank-box'));
   /* 第一次就答對，連續 2 次才移除 */

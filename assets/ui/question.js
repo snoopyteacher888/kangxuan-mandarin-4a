@@ -7,6 +7,19 @@
     for (var i = 0; i < total; i++) d.appendChild(h('span', { class: 'dot' + (i < done ? ' done' : i === done ? ' now' : '') }));
     return d;
   }
+  /* 錯題複習（老師要求要有趣味和鼓勵）：每一題是一隻「錯題怪獸」，答對就把牠變成星星 */
+  var MONSTER = '<svg viewBox="0 0 40 40"><path d="M6 34 V18 a14 14 0 0 1 28 0 V34 l-5-4 -4 4 -5-4 -5 4 -4-4z" fill="#9B7FD4" stroke="#5E3F9E" stroke-width="2.5" stroke-linejoin="round"/><circle cx="15" cy="18" r="4" fill="#fff"/><circle cx="25" cy="18" r="4" fill="#fff"/><circle cx="16" cy="19" r="2" fill="#2B2A28"/><circle cx="24" cy="19" r="2" fill="#2B2A28"/><path d="M15 26 q5 3 10 0" fill="none" stroke="#2B2A28" stroke-width="2" stroke-linecap="round"/><path d="M10 8 l3 5 M30 8 l-3 5" stroke="#5E3F9E" stroke-width="2.5" stroke-linecap="round"/></svg>';
+  var STAR = '<svg viewBox="0 0 40 40"><path d="M20 3 l5 11 12 1.5 -9 8 2.5 12 -10.5 -6 -10.5 6 2.5 -12 -9 -8 12 -1.5z" fill="#F7B955" stroke="#C58A1F" stroke-width="2.5" stroke-linejoin="round"/></svg>';
+  function monsters(total, idx, items) {
+    var d = h('div', { class: 'monster-bar', 'aria-label': '第 ' + (idx + 1) + ' 題，共 ' + total + ' 題' });
+    for (var i = 0; i < total; i++) {
+      var it = items[i], s = h('span', { class: 'mon' + (it ? ' beaten' : i === idx ? ' now' : '') });
+      s.innerHTML = it ? STAR : MONSTER;
+      d.appendChild(s);
+    }
+    return d;
+  }
+  var PRAISE = ['你超棒！', '答對了，好厲害！', '太強了！', '錯題怪獸被你打敗了！', '一次就答對，進步好多！', '你把這一題學會了！', '哇，你好聰明！'];
 
   /* 句型的關聯詞（只要、就、如果……）在題目和選項裡都標橘色 */
   function hlWords(text, words) {
@@ -73,6 +86,7 @@
     var idx = 0, items = [], startedAt = Date.now();
 
     function finish() {
+      H3A.ui.praise = null;
       var results = items.map(function (it) { return it.result; });
       var correct = results.filter(function (r) { return r === 'first'; }).length;
       var rate = H3A.scoring.firstTryRate(results);
@@ -91,6 +105,12 @@
       var hints = speak ? q.hints : q.hints || (ctx.lesson && q.evidence ? H3A.wordq.readingHints(ctx.lesson, q, ctx.words) : null) ||
         { h1: { text: '再想想看。' }, h2: { text: '再仔細看一次題目。' }, teach: { text: '答案是「' + q.options[q.answer].text + '」。' } };
       var locked = false;
+      /* 錯題複習答對時換不同的稱讚，連續答對還會說連對幾題 */
+      H3A.ui.praise = opts.review ? function () {
+        var streak = 1;
+        for (var k = items.length - 1; k >= 0 && items[k].result === 'first'; k--) streak++;
+        return streak >= 3 ? '連續答對 ' + streak + ' 題，你超棒！' : PRAISE[Math.floor(Math.random() * PRAISE.length)];
+      } : null;
       H3A.ui.clear(main);
       var buttons = [];
       var nextBtn = h('button', { type: 'button', class: 'btn-next', hidden: true, onclick: function () {
@@ -115,6 +135,9 @@
           /* 錯題馬上記進自己的錯題複習（老師批改的說說看除外） */
           if (practice && item.result !== 'first' && !item.status && opts.recordMiss !== false) H3A.ui.addMiss(ctx, item.q);
         });
+        /* 錯題複習：答完這一題，怪獸馬上變成星星 */
+        var now = opts.review && main.querySelector('.monster-bar .mon.now');
+        if (now) { now.className = 'mon beaten'; now.innerHTML = STAR; }
         buttons.forEach(function (b) { b.disabled = true; });
         if (bulb) bulb.remove();
         nextBtn.hidden = false;
@@ -218,7 +241,7 @@
         grid.appendChild(h('div', { class: 'option-wrap' }, b, H3A.ui.speaker(o.text, o.say)));
       });
 
-      main.appendChild(dots(questions.length, idx));
+      main.appendChild(opts.review ? monsters(questions.length, idx, items) : dots(questions.length, idx));
       var slot = null;
       var promptText = h('h2', { hidden: !!q.hideText }, q.equation ? eqLine() : q.headChar ? headLine() : q.drag ? withSlot(q.prompt) : q.hl ? hlWords(q.prompt, q.hl) : blanks(q.prompt));
       function withSlot(text) {
@@ -307,7 +330,7 @@
     /* 認識頁：只看、只聽，不算分；按「下一步 ▶」繼續 */
     function showLearn(q) {
       H3A.ui.clear(main);
-      main.appendChild(dots(questions.length, idx));
+      main.appendChild(opts.review ? monsters(questions.length, idx, items) : dots(questions.length, idx));
       var title = q.topic && q.prompt.indexOf(q.topic) >= 0
         ? [q.prompt.slice(0, q.prompt.indexOf(q.topic)), h('span', { class: 'topic-word' }, q.topic), q.prompt.slice(q.prompt.indexOf(q.topic) + q.topic.length)]
         : q.prompt;

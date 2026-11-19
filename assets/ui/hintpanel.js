@@ -61,9 +61,11 @@
     var check = h('span', { class: 'check-wrap' + (target ? ' at-option' : '') }, burst, h('span', { class: 'big-check', 'aria-hidden': 'true' }, '✔'));
     if (target) { target.classList.add('has-check'); target.insertBefore(check, target.firstChild); }
     else feedback.appendChild(check);
-    feedback.appendChild(h('span', { class: 'sr-only' }, '答對啦！'));
+    var praise = H3A.ui.praise && H3A.ui.praise();
+    feedback.appendChild(praise ? h('span', { class: 'praise-pop' }, praise) : h('span', { class: 'sr-only' }, '答對啦！'));
+    if (praise) feedback.className = 'feedback ok celebrate';
     H3A.sfx.correct();
-    var p = H3A.tts.speak('答對啦！');
+    var p = H3A.tts.speak(praise || '答對啦！');
     if (after) p.then(function (ok) { if (ok) H3A.tts.speak(after, afterSay); });
   };
 
