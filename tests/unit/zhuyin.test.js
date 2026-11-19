@@ -72,7 +72,8 @@ test('得 is light tone by default, even when the next character is in another t
   assert.equal(mark('記得要說'), '記得' + V(1) + '要說');
   assert.equal(mark('比賽得了第一名'), '比賽得了第一名');
   assert.equal(mark('得到'), '得到');
-  assert.equal(mark('值得'), '值得');
+  assert.equal(mark('值得'), '值得' + V(1)); // 教育部：值得 ㄓˊ ˙ㄉㄜ
+  assert.equal(mark('獲得'), '獲得');
 });
 test('彷彿 reads ㄈㄤˇ ㄈㄨˊ', () => { assert.equal(mark('彷彿'), '彷' + V(1) + '彿'); });
 test('隨機應變的應念ㄧㄥˋ，到處、重複、背包、發人深省也標對', () => {
@@ -84,3 +85,15 @@ test('隨機應變的應念ㄧㄥˋ，到處、重複、背包、發人深省也
   assert.equal(mark('發人深省'), '發人深省' + V(1));
 });
 test('另眼相看的相念ㄒㄧㄤ', () => { assert.equal(mark('另眼相看'), '另眼相' + V(1) + '看'); });
+
+test('全面檢查後補的讀音：輕聲、破音字、「不」「相」', () => {
+  assert.equal(mark('我不要'), '我不' + V(1) + '要');
+  assert.equal(mark('不好'), '不好');
+  assert.equal(mark('睡不著'), '睡不著');
+  assert.equal(mark('帽子'), '帽子' + V(1));
+  assert.equal(mark('跌倒'), '跌倒' + V(1));
+  assert.equal(mark('互相幫忙'), '互相' + V(1) + '幫忙');
+  assert.equal(mark('照相'), '照相');
+  assert.equal(mark('看一看'), '看一看');
+  assert.equal(mark('一層一層'), '一' + V(2) + '層一' + V(2) + '層');
+});
