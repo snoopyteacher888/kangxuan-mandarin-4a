@@ -204,20 +204,16 @@
     function trySplit(b) {
       /* 只能從上欄跨到下欄，不能跨頁（老師要求）：在下欄放不下就整題移到下一頁 */
       if (bi !== 0) return false;
-      /* 整題移到下欄只空出一點點，就整題移過去，不要把選項和題目拆開（老師說拆開看起來跑版）；
-         會空出一大塊（超過三分之一欄）才把選項接到下欄 */
-      var li = b.el, lp = li.parentNode, ls = li.nextSibling; li.remove();
-      var bl = page.getBoundingClientRect(), minL = bl.right;
-      Array.prototype.forEach.call(page.querySelectorAll('li, .ws-vhead'), function (e) { var r = e.getBoundingClientRect(); if (r.width) minL = Math.min(minL, r.left); });
-      lp.insertBefore(li, ls);
-      if ((minL - bl.left) < bl.width / 3) return false;
       var opts = b.el.querySelector('.ws-opts'); if (!opts) return false;
       var cont = h('li', { class: 'ws-cont' + (b.el.classList.contains('ws-hang') ? ' ws-cont-hang' : '') });
       var holder = opts.parentNode, nextSib = opts.nextSibling, moved = [];
       /* 選項和選項後面的東西（提示、圖）一起移到下一欄 */
       for (var n = opts; n; ) { var nx = n.nextSibling; moved.push(n); cont.appendChild(n); n = nx; }
       if (over()) { moved.forEach(function (n) { holder.insertBefore(n, nextSib); }); return false; }
+      /* 接到下欄的選項往下縮，跟其他題的選項同一高度開始（對齊題目文字，不是頂到最上面） */
+      var body = b.el.querySelector('.ws-body'), off = body ? body.getBoundingClientRect().top - b.el.getBoundingClientRect().top : 0;
       nextBand(); put({ el: cont, item: true, sec: b.sec });
+      if (off > 0) cont.style.setProperty('padding-top', off + 'px', 'important');
       return true;
     }
     newPage();
